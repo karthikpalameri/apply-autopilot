@@ -35,7 +35,7 @@ class TestSkills(unittest.TestCase):
                 if f != "SKILL.md":
                     continue
                 p = os.path.join(root, f)
-                rel = os.path.relpath(p, ROOT)
+                rel = os.path.relpath(p, ROOT).replace("\\", "/")
                 txt = open(p, encoding="utf-8").read()
                 self.assertTrue(txt.startswith("---"), f"{rel} missing frontmatter")
                 fm = txt.split("---", 2)[1] if txt.count("---") >= 2 else ""
@@ -51,7 +51,7 @@ class TestSkills(unittest.TestCase):
                 if not f.endswith(".md"):
                     continue
                 p = os.path.join(root, f)
-                rel = os.path.relpath(p, ROOT)
+                rel = os.path.relpath(p, ROOT).replace("\\", "/")
                 txt = open(p, encoding="utf-8").read()
                 for m in PATH_RE.finditer(txt):
                     link = m.group(1)

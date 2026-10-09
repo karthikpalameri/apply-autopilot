@@ -71,7 +71,7 @@ def check_skill_frontmatter():
             if f != "SKILL.md":
                 continue
             p = os.path.join(root, f)
-            rel = os.path.relpath(p, HUB)
+            rel = os.path.relpath(p, HUB).replace("\\", "/")
             txt = open(p, encoding="utf-8").read()
             if not txt.startswith("---"):
                 note_fail(f"{rel}: missing frontmatter (---)")
