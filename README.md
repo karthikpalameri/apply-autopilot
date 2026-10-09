@@ -198,9 +198,13 @@ We don't own these — we only talk to their public job boards / APIs.
 - **git-filter-repo** (used to scrub personal data from git history) — https://github.com/newren/git-filter-repo
 
 ### 💡 Ideas we borrowed
-- The **agent "Skills"** pattern — a folder of `SKILL.md` files the agent reads on demand.
+- The **agent "Skills"** pattern — a folder of `SKILL.md` files the agent reads on demand
+  (popularized by **Anthropic Claude Skills** — https://github.com/anthropics/skills).
 - **pre-check → act → post-check** transaction discipline, and the **Kaizen** continuous-improvement loop.
 - Public community write-ups on ATS form quirks, browser-automation reliability, and job-search tactics.
+- Software-design principles we lean on: **DRY** (one source of truth for your data),
+  **SOLID** (dependency-inversion in `core/browser.py`), and **OWASP/NIST-style**
+  "never store secrets in source" hygiene.
 
 ### 🛠️ Built with
 - Written collaboratively with an **AI coding agent** (pi) — hence "vibe-coded".
