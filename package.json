@@ -1,0 +1,15 @@
+{
+  "name": "apply-autopilot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cross-platform job-application automation: find → verify → apply → track, with your own resume.",
+  "scripts": {
+    "setup": "python3 hub.py setup",
+    "install": "python3 hub.py install",
+    "start": "python3 hub.py start",
+    "stop": "python3 hub.py stop",
+    "health": "python3 hub.py health",
+    "mcp": "npx -y cloakbrowser-mcp --transport streamable-http --http-port 3000"
+  },
+  "license": "MIT"
+}

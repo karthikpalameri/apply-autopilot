@@ -1,0 +1,51 @@
+# ---------------------------------------------------------------------------
+# Secrets & local state — NEVER commit these.
+# ---------------------------------------------------------------------------
+config/user.json          # YOUR identity + credentials (written by setup.py)
+config/resume.md5         # YOUR resume hash
+config/*.pdf              # YOUR resume / attachments
+config/*.bak
+config/mcp_session.json
+config/profile.json
+config/cover_letter.txt
+config/sitekey.txt
+core/.env
+.env
+**/.env
+
+# Job tracker (personal application history)
+config/progress.json
+config/applied_vs_not_applied.md
+config/product_companies_tracker.md
+config/li_*.json
+config/targets.json
+scratch/
+
+# Local runtime (browser sessions, cookies, logins, pids)
+runtime/*
+!runtime/server.py
+runtime/pids/
+runtime/mcp-session/
+runtime/session/
+runtime/lseg-mcp-probe/
+runtime/*.json
+logs/
+*.png
+*.log
+.playwright-mcp/
+temp/
+
+# SearXNG generated settings (contain the instance secret)
+infra/searxng/core-config/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db

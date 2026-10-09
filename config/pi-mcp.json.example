@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "cloak-browser": {
+      "command": "cloak-browser-mcp",
+      "args": [
+        "--caps", "all",
+        "--headed",
+        "--viewport", "1280x800",
+        "--enable-unsafe-eval",
+        "--profile-dir", "/ABSOLUTE/PATH/TO/apply-autopilot/runtime/mcp-session",
+        "--upload-allow-dir", "/ABSOLUTE/PATH/TO/apply-autopilot",
+        "--download-dir", "/ABSOLUTE/PATH/TO/apply-autopilot/temp",
+        "--max-pages", "20"
+      ]
+    }
+  }
+}

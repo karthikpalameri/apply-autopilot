@@ -1,0 +1,8 @@
+# Python dependencies for Apply Autopilot.
+# Install with:  python3 hub.py install   (creates .venv and installs these)
+cloakbrowser>=1.0.0          # stealth Chromium / Playwright browser engine (bundles playwright)
+pypdf>=4.0.0                 # read resume PDF (used for integrity checks)
+Pillow>=10.0.0               # image handling for OCR screenshots
+pytesseract>=0.3.10          # OCR wrapper (core/see.py, core/verify.py)
+requests>=2.31.0             # HTTP for ATS APIs (find/prod_sweep.py)
+certifi>=2024.0.0            # TLS certs for API calls
