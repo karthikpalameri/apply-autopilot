@@ -13,7 +13,7 @@ git-ignored `config/user.json` that you create with one interactive wizard.
 git clone <this-repo> apply-autopilot
 cd apply-autopilot
 
-python3 hub.py setup      # 1. step-by-step wizard: YOUR name/email/phone/CTC/resume/creds
+python3 hub.py onboard    # 1. GUIDED: explains everything → grills your skills → Gmail consent → profile
 python3 hub.py install    # 2. installs Python venv + npm + pi packages + pi MCP config
 python3 hub.py start      # 3. starts the browser stack (:9000 ctl + :3000 MCP)
 python3 hub.py health     # 4. verify everything is green (6 tests)
@@ -22,8 +22,12 @@ python3 hub.py health     # 4. verify everything is green (6 tests)
 Windows users run the same commands (`python` instead of `python3`), or double-click
 `setup.bat` → `install.bat` → `run.bat`.
 
-`setup.py` writes `config/user.json` (chmod 600, git-ignored) and `config/resume.md5`.
-**No secrets live in this repository.**
+`onboarding.py` walks you through it step by step: it asks setup questions, **grills you
+with interview-style questions** to extract your skills/achievements, clearly explains how
+Gmail is used (OTP reads, ATS sign-ups, recruiter cold emails) and asks for consent, then
+generates a tailored profile (`config/profile.md`) so you are **never asked twice**.
+
+**No secrets live in this repository.** For coding agents, start at `AGENTS.md`.
 
 ---
 

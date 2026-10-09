@@ -1,20 +1,27 @@
 ---
 name: email
-description: EMAIL node — recruiter outreach as Gmail DRAFTS (never send). Caveman.
+description: EMAIL node — recruiter outreach via Gmail (draft by default; send only with fresh user consent).
 parent: skills/SKILL.md
 ---
 
 # EMAIL
 
+## CONSENT GATE (read first)
+- Gmail is used ONLY when `gmail_consent: true` is present in `config/user.json`
+  (set during `python3 hub.py onboard`). Without it, skip OTP reads + cold emails.
+- DRAFTING a recruiter email is the default. SENDING requires a FRESH user approval
+  per email (show the subject + body, ask, then send). Never auto-send.
+
 ## TAB SAFETY
-- Follow `skills/SKILL.md` → **TWO-TAB SESSION**. Gmail drafts and reads use the one reusable GMAIL tab; never navigate FORM to Gmail.
+- Follow `skills/SKILL.md` → **TWO-TAB SESSION**. Gmail drafts/reads use the one reusable GMAIL tab; never navigate FORM to Gmail.
 
 ## FLOW
 1. Find recruiter (LinkedIn post/company page)
 2. Draft = humble template (skills/recipes/email-template-humble.md) + name + "Found via: <link>"
-3. Gmail compose URL → DRAFT (create fresh — editing flaky; NEVER send)
-4. Attach resume (filechooser); save draft (Close)
-5. Track config/progress.json
+3. Gmail compose URL → save as DRAFT (create fresh — editing flaky)
+4. Attach resume (filechooser); save draft
+5. Show the user the draft → ask "send now?" → only on explicit YES, click Send
+6. Track config/progress.json (status: draft | sent)
 
 ## TONE
 - Humble + specific (role, company, found-via link)

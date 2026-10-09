@@ -139,9 +139,20 @@ def setup_interactive():
     cfg["edu_end_year"] = ask_int("End year", 2017)
 
     print("\n--- 6/6  Credentials (stored ONLY in local config/user.json + core/.env) ---")
+    print("""
+Gmail is used ONLY with your consent, for FOUR specific things:
+  1. READ OTP / verification codes during company ATS sign-ups
+  2. READ application confirmations (so we only count real submissions)
+  3. REGISTER / log into company ATS accounts (Workday/Greenhouse/Lever…)
+  4. DRAFT and (only if you approve) SEND cold emails to recruiters
+Your Gmail password is never stored in the repository — only in this local
+chmod-600 config file or the logged-in browser session.
+""")
+    gmail_consent = ask_bool("Consent to the agent using Gmail for the 4 purposes above?")
+    cfg["gmail_consent"] = gmail_consent
     cfg["linkedin_user"] = ask("LinkedIn login email", cfg["email"])
     cfg["linkedin_pass"] = ask("LinkedIn password", "", secret=True)
-    cfg["gmail_user"] = ask("Gmail address (for OTP/confirmation reads)", cfg["email"])
+    cfg["gmail_user"] = ask("Gmail address", cfg["email"])
     cfg["gmail_app_pw"] = ask("Gmail App Password (IMAP — optional)", "", secret=True)
     cfg["capsolver_key"] = ask("CapSolver API key (optional, for captchas)", "", secret=True)
 

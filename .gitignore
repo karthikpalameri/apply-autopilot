@@ -1,7 +1,9 @@
 # ---------------------------------------------------------------------------
 # Secrets & local state — NEVER commit these.
 # ---------------------------------------------------------------------------
-config/user.json          # YOUR identity + credentials (written by setup.py)
+config/user.json          # YOUR identity + credentials (written by setup.py/onboarding.py)
+config/profile.json       # YOUR grilled profile (skills/achievements/interview answers)
+config/profile.md         # human-readable profile (auto-generated, personal)
 config/resume.md5         # YOUR resume hash
 config/*.pdf              # YOUR resume / attachments
 config/*.bak

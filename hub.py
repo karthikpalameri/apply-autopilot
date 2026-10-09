@@ -2,7 +2,8 @@
 """hub.py — cross-platform command center for Apply Autopilot (macOS / Linux / Windows).
 
 Usage:
-    python3 hub.py setup      # interactive personalization wizard (writes config/user.json)
+    python3 hub.py onboard    # GUIDED first-run experience (recommended): explains, grills, configures
+    python3 hub.py setup      # quick identity/resume/credentials wizard (writes config/user.json)
     python3 hub.py install    # create .venv + install Python/npm/pi dependencies + pi MCP config
     python3 hub.py start      # start the browser stack (server.py :9000 + cloakbrowser-mcp :3000)
     python3 hub.py stop       # stop the browser stack
@@ -130,6 +131,11 @@ def _spawn(name, cmd, env=None):
 # ---------------------------------------------------------------- commands
 def cmd_setup():
     r = run([sys.executable, "setup.py"], capture=False)
+    return r.returncode
+
+
+def cmd_onboard():
+    r = run([sys.executable, "onboarding.py"], capture=False)
     return r.returncode
 
 
@@ -350,6 +356,7 @@ def cmd_doctor():
 
 def main():
     cmds = {
+        "onboard": cmd_onboard,
         "setup": cmd_setup,
         "install": cmd_install,
         "start": cmd_start,

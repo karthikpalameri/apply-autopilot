@@ -33,6 +33,7 @@
   "edu_end_year": 2017,
   "linkedin_user": "jane.doe@example.com",
   "linkedin_pass": "",
+  "gmail_consent": true,
   "gmail_user": "jane.doe@example.com",
   "gmail_app_pw": "",
   "capsolver_key": "",

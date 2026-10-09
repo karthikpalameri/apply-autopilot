@@ -42,13 +42,16 @@ Install these once, per OS:
 git clone <your-fork> apply-autopilot
 cd apply-autopilot
 
-python3 setup.py          # step-by-step wizard → writes config/user.json (chmod 600)
+python3 hub.py onboard    # GUIDED: explains the tool → grills your skills → Gmail consent → profile
+# (quick path: python3 setup.py writes only identity/resume/credentials)
 python3 setup.py --check  # show what's configured (secrets redacted)
 ```
 
-`setup.py` asks for: name, email, phone, location, CTC, notice period, LinkedIn/GitHub,
-resume path, education, LinkedIn/Gmail credentials, CapSolver key, and India application
-answers. It also derives the professional resume filename and writes `config/resume.md5`.
+`onboarding.py` asks for: identity, experience + target roles, compensation + notice,
+resume path, education, **interview-style skill questions** (languages, frameworks, tools,
+achievements, certifications), interview answers, Gmail consent, and credentials. It derives
+the professional resume filename, writes `config/resume.md5`, and generates
+`config/profile.md` (your tailored profile + interview cheat sheet). Nothing is asked twice.
 
 ---
 

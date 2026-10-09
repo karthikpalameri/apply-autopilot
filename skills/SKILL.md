@@ -1,8 +1,8 @@
 ---
-name: job-apply-hub
+name: apply-autopilot
 description: MASTER skill — routes the job-hunt graph. Read me first; follow the edges.
 version: 23.4.0
-platforms: [macos]
+platforms: [macos, linux, win32]
 ---
 
 # JOB-HUNT GRAPH (master)
