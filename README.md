@@ -13,10 +13,11 @@ git-ignored `config/user.json` that you create with one interactive wizard.
 git clone <this-repo> apply-autopilot
 cd apply-autopilot
 
-python3 hub.py onboard    # 1. GUIDED: explains everything → grills your skills → Gmail consent → profile
-python3 hub.py install    # 2. installs Python venv + npm + pi packages + pi MCP config
+python3 hub.py onboard    # 1. GUIDED: reads your resume → confirm/correct every field → profile
+python3 hub.py install    # 2. INTERACTIVE: shows missing deps + commands (brew/apt/winget) → installs all
 python3 hub.py start      # 3. starts the browser stack (:9000 ctl + :3000 MCP)
 python3 hub.py health     # 4. verify everything is green (6 tests)
+python3 hub.py eval       # 5. readiness evaluation — test cases + % success rate
 ```
 
 Windows users run the same commands (`python` instead of `python3`), or double-click

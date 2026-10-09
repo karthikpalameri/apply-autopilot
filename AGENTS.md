@@ -50,11 +50,12 @@ All entry points are in `hub.py` — use `python3 hub.py <command>` (Windows: `p
 |---|---|
 | `onboard` | **first-run guided experience** — reads your resume first, then confirms every field |
 | `setup` | quick identity/resume/credentials wizard only |
-| `install` | create `.venv` + install Python deps + npm MCP + pi packages + pi config |
+| `install` | **interactive installer** — detects OS + brew/apt/winget, SHOWS missing deps + commands, installs them on consent; then venv + npm MCP + pi packages + pi config |
 | `start` / `stop` / `restart` | start/stop the browser stack (`runtime/server.py` :9000 + `cloakbrowser-mcp` :3000) |
 | `health` | 6-test health check (`core/test_hub.py`) |
 | `track` | applied-vs-not-applied report |
 | `doctor` | environment diagnosis |
+| `eval` | **readiness evaluation** — runs test cases and prints a weighted % success rate + fixes |
 | `mcp-config` | regenerate `~/.pi/agent/mcp-adapter.json` + `web-search.json` |
 
 POSIX wrappers: `run.sh`, `run_li.sh`, `track.sh`. Windows: `run.bat`, `run_li.bat`,
@@ -73,6 +74,8 @@ docs/DEPENDENCIES.md← complete dependency manifest
 lean-mode.md        ← token/cost runbook (read once per session)
 
 hub.py              ← cross-platform CLI (single entry point)
+installer.py        ← interactive cross-platform installer (brew/apt/winget)
+eval.py             ← readiness evaluation: test cases → % success rate
 setup.py            ← identity/credentials wizard (also imported by onboarding.py)
 onboarding.py       ← resume-first guided setup: read resume → review/confirm → fill gaps →
                        skills → interview → Gmail consent → env check → generate profile

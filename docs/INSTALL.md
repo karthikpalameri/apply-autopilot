@@ -55,21 +55,32 @@ the professional resume filename, writes `config/resume.md5`, and generates
 
 ---
 
-## 3. Install dependencies (venv + npm + pi)
+## 3. Install dependencies — INTERACTIVE (venv + npm + pi + system tools)
 
 ```bash
 python3 hub.py install
 ```
 
-This does, in order:
+This detects your OS and package manager (`brew` / `apt` / `winget`), then:
 
-1. Creates `.venv` and installs `requirements.txt` (`cloakbrowser`, `pypdf`, `Pillow`,
+1. **Checks every system tool** (node, git, tesseract, docker-optional) and, for each
+   missing one, **shows the exact command it will run** and asks:
+   `Proceed with these installs now? [y/n]` — e.g.
+   - macOS: `brew install tesseract`
+   - Linux: `sudo apt-get install -y tesseract-ocr`
+   - Windows: `winget install -e --id UB-Mannheim.TesseractOCR`
+2. Creates `.venv` and installs `requirements.txt` (`cloakbrowser`, `pypdf`, `Pillow`,
    `pytesseract`, `requests`, `certifi`).
-2. Verifies Node + npm.
 3. Installs `@devinwangd/cloak-browser-mcp` globally (Pi stdio browser).
-4. Installs pi packages: `pi-mcp-adapter`, `pi-web-access`, `context-mode`.
-5. Writes `~/.pi/agent/mcp-adapter.json` + `~/.pi/web-search.json` (absolute paths for this checkout).
-6. Prints OS-specific guidance for tesseract/docker.
+4. Installs `pi` coding agent (if missing) + pi packages: `pi-mcp-adapter`, `pi-web-access`,
+   `context-mode`.
+5. Writes `~/.pi/agent/mcp-adapter.json` + `~/.pi/web-search.json` (absolute paths).
+
+After install, evaluate your setup:
+
+```bash
+python3 hub.py eval    # readiness evaluation — test cases + % success rate
+```
 
 ---
 
@@ -135,6 +146,7 @@ First run: the browser opens → log in manually once to LinkedIn + Gmail
 ## 9. Verification checklist
 
 ```bash
+python3 hub.py eval                                      # readiness evaluation (test cases + % score)
 python3 hub.py doctor                                   # environment diagnosis
 .venv/bin/python core/ctl.py '{"op":"status"}'          # browser up
 .venv/bin/python core/wday_probe.py                     # Workday up/down

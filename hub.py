@@ -11,6 +11,7 @@ Usage:
     python3 hub.py health     # run the 6-test health check
     python3 hub.py track      # applied vs not-applied report (config/progress.json)
     python3 hub.py doctor     # diagnose environment (python/node/pi/ports/config)
+    python3 hub.py eval       # readiness evaluation: test cases + % success rate
     python3 hub.py mcp-config # (re)generate ~/.pi/agent/mcp-adapter.json + web-search.json
 
 This is the recommended entry point on ALL platforms. The run.sh / run_li.sh / track.sh
@@ -140,62 +141,14 @@ def cmd_onboard():
 
 
 def cmd_install():
-    print("=" * 64)
-    print("INSTALL — Apply Autopilot dependencies (cross-platform)")
-    print("=" * 64)
-
-    # 1. Python venv
-    print("\n[1/6] Python virtualenv")
-    if not os.path.exists(os.path.join(HUB, ".venv")):
-        r = run([sys.executable, "-m", "venv", ".venv"], capture=False)
-        if r.returncode != 0:
-            print("❌ could not create .venv"); return 1
-    else:
-        print("  .venv already exists")
-    vp = venv_python()
-    run([vp, "-m", "pip", "install", "--upgrade", "pip"], capture=False)
-    run([vp, "-m", "pip", "install", "-r", "requirements.txt"], capture=False)
-
-    # 2. Node + npm
-    print("\n[2/6] Node.js + npm")
-    node = shutil.which(node_cmd())
-    if not node:
-        print("  ⚠️  node not found — install from https://nodejs.org (LTS) then re-run install")
-    else:
-        r = run([node, "--version"], capture=True)
-        print(f"  node {r.stdout.strip()}")
-
-    # 3. Global npm MCP servers
-    print("\n[3/6] npm MCP servers")
-    if node:
-        run([npx_cmd(), "--version"], capture=False)
-        print("  installing @devinwangd/cloak-browser-mcp (Pi stdio browser)…")
-        run(["npm", "install", "-g", "@devinwangd/cloak-browser-mcp"], capture=False)
-        print(f"  cloakbrowser-mcp@{CLOAKBROWSER_MCP_VERSION} is launched on demand by hub.py start")
-    else:
-        print("  skipped (node missing)")
-
-    # 4. pi coding agent + packages
-    print("\n[4/6] pi coding agent packages")
-    pi = shutil.which("pi")
-    if pi:
-        for pkg in ("npm:pi-mcp-adapter", "npm:pi-web-access", "npm:context-mode"):
-            print(f"  pi install {pkg}")
-            run([pi, "install", pkg], capture=False)
-    else:
-        print("  ⚠️  pi not found — install it first (see docs/INSTALL.md), then re-run install")
-
-    # 5. pi MCP + web-search config (absolute paths for this checkout)
-    print("\n[5/6] pi MCP + web-search config")
-    cmd_mcp_config()
-
-    # 6. System tools (informational)
-    print("\n[6/6] System tools (manual — follow OS-specific guidance)")
-    print("  tesseract (OCR):  brew install tesseract  |  apt install tesseract-ocr  |  winget install tesseract")
-    print("  docker (SearXNG): optional — see infra/searxng/README.md")
-
-    print("\n✅ install finished. Next:  python3 hub.py setup && python3 hub.py start")
+    import installer
+    installer.run_all(interactive=True)
     return 0
+
+
+def cmd_eval():
+    import eval as evaluator
+    return 0 if evaluator.evaluate() >= 70 else 1
 
 
 def cmd_mcp_config():
@@ -345,7 +298,7 @@ def cmd_doctor():
 
     # pi packages
     if shutil.which("pi"):
-        r = run([shutil.which("pi"), "install", "--list"], capture=True)
+        r = run([shutil.which("pi"), "list"], capture=True)
         if r.returncode == 0:
             out = r.stdout + r.stderr
             for pkg in ("pi-mcp-adapter", "pi-web-access", "context-mode"):
@@ -365,6 +318,7 @@ def main():
         "health": cmd_health,
         "track": cmd_track,
         "doctor": cmd_doctor,
+        "eval": cmd_eval,
         "mcp-config": cmd_mcp_config,
     }
     if len(sys.argv) < 2 or sys.argv[1] not in cmds:
