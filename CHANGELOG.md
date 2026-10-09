@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.2] — 2026-10-09
+
+Patch release fixing the CI pipeline and making the scripts safe on the Windows
+`cp1252` console.
+
+### Fixed
+- **CI privacy job** no longer fails on its own pattern (the workflow file is excluded
+  from the `git grep` self-scan).
+- **Windows `UnicodeEncodeError`**: entry points now force UTF-8 stdout/stderr, so
+  emoji output (`✅` / `⚠️` / `→`) no longer crashes the default Windows console.
+- `tests/run_tests.py` puts the repo root on `sys.path` before importing `core`.
+
+### Added
+- `core/console.py` — shared `enable_utf8()` + `propagate_utf8_env()` helpers.
+- `tests/test_console.py` — cross-platform UTF-8 guard tests.
+- `PYTHONUTF8=1` exported by the `.bat` / `.sh` wrappers and the CI env.
+
+---
+
 ## [0.0.1] — 2026-10-09
 
 First public release. A generic, cross-platform (macOS / Linux / Windows)
@@ -44,4 +63,5 @@ job-application automation repo that ships with **zero personal data**.
 - No secrets, passwords, recruiter emails, CTC figures, addresses, or employer names
   are present anywhere in the repository.
 
+[0.0.2]: https://github.com/karthikpalameri/apply-autopilot/releases/tag/v0.0.2
 [0.0.1]: https://github.com/karthikpalameri/apply-autopilot/releases/tag/v0.0.1
