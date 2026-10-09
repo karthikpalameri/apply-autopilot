@@ -136,10 +136,11 @@ verifiably, and without leaking your data. All credit goes to the projects below
 ### 🌐 Browser automation & MCP
 | Project | What we use it for | Link |
 |---|---|---|
-| **Playwright** | driving the real, **headed** browser | https://playwright.dev |
-| **Playwright MCP** | the HTTP `:3000` browser-tool surface | https://github.com/microsoft/playwright-mcp |
+| **Playwright** (Microsoft) | driving the real, **headed** browser | https://playwright.dev |
+| **Playwright MCP** (Microsoft) | the HTTP `:3000` browser-tool surface | https://github.com/microsoft/playwright-mcp |
+| **cloakbrowser** (PyPI) | stealth Chromium engine (bundles Playwright) | https://pypi.org/project/cloakbrowser/ |
 | **cloak-browser-mcp** (`@devinwangd/cloak-browser-mcp`) | stealth Chromium MCP server | https://www.npmjs.com/package/@devinwangd/cloak-browser-mcp |
-| **Model Context Protocol (MCP)** | the standard tool protocol for agents | https://modelcontextprotocol.io |
+| **Model Context Protocol (MCP)** (Anthropic) | the standard tool protocol for agents | https://modelcontextprotocol.io |
 | **Chromium** | the browser itself | https://www.chromium.org |
 
 ### 🔎 Search
@@ -160,16 +161,19 @@ verifiably, and without leaking your data. All credit goes to the projects below
 - **certifi** — TLS certificate bundle — https://github.com/certifi/python-certifi
 
 ### 🧩 CAPTCHA solving (optional)
-- **CapSolver** — https://www.capsolver.com
+- **CapSolver** (service) — https://www.capsolver.com
+- **capsolver** (PyPI client) — https://pypi.org/project/capsolver/
 
 ### 📨 Email / OTP (stdlib, no third party)
 - **Python** `imaplib` / `smtplib` / `email` — https://www.python.org
 - **Gmail App Passwords** — https://support.google.com/accounts/answer/185833
 
 ### 🖥️ System tools & package managers
-- **Python** — https://www.python.org · **Node.js / npm / npx** — https://nodejs.org
-- **Homebrew** (macOS) — https://brew.sh · **apt** (Debian/Ubuntu) — https://wiki.debian.org/Apt · **winget** (Windows) — https://github.com/microsoft/winget-cli
-- **Git** — https://git-scm.com · **Docker** — https://www.docker.com
+- **Python** — https://www.python.org · **pip / PyPA** — https://pip.pypa.io · **Node.js / npm / npx** — https://nodejs.org
+- **macOS:** **Homebrew** — https://brew.sh
+- **Linux:** **apt** — https://wiki.debian.org/Apt · **dnf** — https://github.com/rpm-software-management/dnf · **pacman** — https://archlinux.org/pacman/ · **zypper** — https://en.opensuse.org/Portal:Zypper
+- **Windows:** **winget** (Microsoft) — https://github.com/microsoft/winget-cli · **Chocolatey** — https://chocolatey.org · **Scoop** — https://scoop.sh
+- **Git** — https://git-scm.com · **Docker** — https://www.docker.com · **curl** — https://curl.se
 
 ### 🏢 ATS platforms & public job boards (the things we apply *to*)
 We don't own these — we only talk to their public job boards / APIs.
@@ -188,6 +192,10 @@ We don't own these — we only talk to their public job boards / APIs.
 - **Conventional Commits** — https://www.conventionalcommits.org
 - **Shields.io** (badges) — https://shields.io
 - **MIT License** — https://opensource.org/license/mit
+
+### 🌍 Hosting & repo tooling
+- **GitHub** (hosting + Releases) — https://github.com · **GitHub Linguist** (`.gitattributes`) — https://github.com/github-linguist/linguist
+- **git-filter-repo** (used to scrub personal data from git history) — https://github.com/newren/git-filter-repo
 
 ### 💡 Ideas we borrowed
 - The **agent "Skills"** pattern — a folder of `SKILL.md` files the agent reads on demand.
