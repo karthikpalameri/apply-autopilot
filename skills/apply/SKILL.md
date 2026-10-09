@@ -92,3 +92,13 @@ For the requested LinkedIn batch, identify three candidate roles, then check eac
 - ❌ NEVER use stale refs (fields re-render — refs churn; re-snapshot before typing).
 - ❌ NEVER guess field identity (a11y labels lie; verify the field has the value after typing).
 - ✅ After every fill step → read the value back (evaluate) → confirm exact.
+
+
+---
+
+## RELATED (skill graph — every node is one click away)
+- **Master:** `skills/SKILL.md` · **Reference:** `skills/REFERENCE.md` · **Reliability:** `skills/RELIABILITY.md`
+- **Nodes:** `apply` · `email` · `find` · `learn` · `ops` · `resume` · `track` · `verify` (each `skills/<node>/SKILL.md`)
+- **Recipes:** `skills/recipes/` — workday · greenhouse · lever · icims · linkedin · phenom · breezy · jobvite · oraclehcm · email-template-humble
+- **Lessons:** `skills/LESSONS/LESSONS-*.md` — apply · find · verify · email · ops · naukri-profile
+- **Index:** `skills/README.md` · **Repo entry for agents:** `AGENTS.md`

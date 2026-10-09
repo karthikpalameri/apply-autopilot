@@ -61,3 +61,13 @@ md5 config/Firstname_Lastname_Role.pdf
 certutil -hashfile config\Firstname_Lastname_Role.pdf MD5
 # expect the hash stored in config/resume.md5
 ```
+
+
+---
+
+## RELATED (skill graph — every node is one click away)
+- **Master:** `skills/SKILL.md` · **Reference:** `skills/REFERENCE.md` · **Reliability:** `skills/RELIABILITY.md`
+- **Nodes:** `apply` · `email` · `find` · `learn` · `ops` · `resume` · `track` · `verify` (each `skills/<node>/SKILL.md`)
+- **Recipes:** `skills/recipes/` — workday · greenhouse · lever · icims · linkedin · phenom · breezy · jobvite · oraclehcm · email-template-humble
+- **Lessons:** `skills/LESSONS/LESSONS-*.md` — apply · find · verify · email · ops · naukri-profile
+- **Index:** `skills/README.md` · **Repo entry for agents:** `AGENTS.md`

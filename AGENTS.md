@@ -48,7 +48,7 @@ All entry points are in `hub.py` — use `python3 hub.py <command>` (Windows: `p
 
 | Command | Purpose |
 |---|---|
-| `onboard` | **first-run guided experience** — explains, grills skills, configures everything |
+| `onboard` | **first-run guided experience** — reads your resume first, then confirms every field |
 | `setup` | quick identity/resume/credentials wizard only |
 | `install` | create `.venv` + install Python deps + npm MCP + pi packages + pi config |
 | `start` / `stop` / `restart` | start/stop the browser stack (`runtime/server.py` :9000 + `cloakbrowser-mcp` :3000) |
@@ -74,7 +74,9 @@ lean-mode.md        ← token/cost runbook (read once per session)
 
 hub.py              ← cross-platform CLI (single entry point)
 setup.py            ← identity/credentials wizard (also imported by onboarding.py)
-onboarding.py       ← GUIDED setup: explain → grill → Gmail consent → generate profile
+onboarding.py       ← resume-first guided setup: read resume → review/confirm → fill gaps →
+                       skills → interview → Gmail consent → env check → generate profile
+resume_parser.py    ← heuristic resume PDF reader (email/phone/links/skills/years/education)
 
 core/               ← browser control, resume gates, gmail read, OCR, capsolver, verify
 apply/              ← apply drivers (li_drive, ih_sweep, fill_gh_fast, li_listed_apply)
@@ -118,6 +120,13 @@ Then, per concern (read only the one you need):
 **Lessons** (`skills/LESSONS/`): accumulated hard-won learnings, one file per concern.
 
 **Index:** `skills/README.md` (graph summary).
+
+**Cross-links:** every node ends with a `## RELATED` footer pointing to every other
+node + recipes + lessons, so the graph is navigable from any single skill file.
+
+**Tools → files map & MCP index:** `skills/ops/SKILL.md` (sections `TOOL → FILE MAP`
+and `MCP INDEX`) maps each capability to the file that owns it and every MCP server
+to its owner/consumer.
 
 ---
 

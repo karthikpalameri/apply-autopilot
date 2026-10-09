@@ -46,6 +46,38 @@ parent: skills/SKILL.md
 - core/login_linkedin.py, login_naukri.py: ref-based logins
 - macOS TCC: copy files into hub (browser can't read ~/Downloads)
 
+## TOOL → FILE MAP (discover any tool by the file that owns it)
+| Tool / capability | File |
+|---|---|
+| Cross-platform CLI (setup/install/start/stop/health/track/doctor) | `hub.py` |
+| Guided resume-first onboarding | `onboarding.py` + `resume_parser.py` |
+| Identity/credentials wizard | `setup.py` |
+| Config loader (single source of truth `A`) | `config/answers.py` |
+| Browser abstraction (MCP :3000 + ctl :9000) | `core/browser.py` |
+| ctl bridge :9000 (TCP JSONL) | `runtime/server.py` + `core/ctl.py` |
+| Resume MD5 gates (PICK/UPLOAD/POST) | `core/resume_secure.py` |
+| Gmail OTP/confirmation read | `core/gmail_read.py` (browser) · `core/gmail_otp.py` (IMAP) |
+| LinkedIn / Naukri login | `core/login_linkedin.py` · `core/login_naukri.py` |
+| CapSolver captcha | `core/capsolver.py` |
+| Post-submit proof gate | `core/hard_assert.py` |
+| OCR / DOM verify | `core/see.py` · `core/verify.py` |
+| Health check (6 tests) | `core/test_hub.py` |
+| MCP live probe | `core/mcp_test.py` |
+| Workday up/down probe | `core/wday_probe.py` |
+| Apply drivers | `apply/li_drive.py` · `apply/ih_sweep.py` · `apply/fill_gh_fast.py` · `apply/li_listed_apply.py` |
+| Job discovery | `find/prod_sweep.py` · `find/sweep.py` · `find/product_companies_builder.py` · `find/product_lookup.py` |
+| Applied-vs-not report | `find/tracker_reconcile.py` (via `hub.py track`) |
+
+## MCP INDEX (discover every MCP server + who owns it)
+| Server | Transport | Port / pipe | Owner | Consumer |
+|---|---|---|---|---|
+| `cloak-browser` (`@devinwangd/cloak-browser-mcp`) | stdio | — | `~/.pi/agent/mcp-adapter.json` | Pi agent (`mcp__cloak_browser` tools) |
+| `cloakbrowser-mcp` (npm) | Streamable HTTP | :3000 | `hub.py start` / `run.sh` | Python (`core/browser.py` McpBrowser) |
+| `runtime/server.py` (ctl) | TCP JSONL | :9000 | `hub.py start` / `run.sh` | Python fast-path (`core/ctl.py`) |
+| `pi-mcp-adapter` (pi pkg) | — | — | pi package | pi ↔ MCP bridge |
+
+**Rule:** one owner per channel — `:3000` must never be declared to Pi (`.mcp.json` stays `{"mcpServers": {}}`).
+
 ## LESSONS
 - skills/LESSONS/LESSONS-ops.md
 - core/hard_assert.py: assert_applied(b, co) — post-submit proof gate (OCR+DOM). ALWAYS import + call after submit.
@@ -67,3 +99,13 @@ parent: skills/SKILL.md
   `~/.pi/web-search.json` → `searxngBaseUrl: http://127.0.0.1:8080`.
 - Trade-off: pi's `provider: searxng` may report "Blocked internal address for 127.0.0.1" on some calls
   (SearXNG SSRF guard) — use provider "all" or fall back to another provider if that bites.
+
+
+---
+
+## RELATED (skill graph — every node is one click away)
+- **Master:** `skills/SKILL.md` · **Reference:** `skills/REFERENCE.md` · **Reliability:** `skills/RELIABILITY.md`
+- **Nodes:** `apply` · `email` · `find` · `learn` · `ops` · `resume` · `track` · `verify` (each `skills/<node>/SKILL.md`)
+- **Recipes:** `skills/recipes/` — workday · greenhouse · lever · icims · linkedin · phenom · breezy · jobvite · oraclehcm · email-template-humble
+- **Lessons:** `skills/LESSONS/LESSONS-*.md` — apply · find · verify · email · ops · naukri-profile
+- **Index:** `skills/README.md` · **Repo entry for agents:** `AGENTS.md`

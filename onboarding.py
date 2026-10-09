@@ -1,72 +1,49 @@
 #!/usr/bin/env python3
-"""onboarding.py — friendly guided setup for Apply Autopilot (cross-platform).
+"""onboarding.py — resume-first guided setup for Apply Autopilot (cross-platform).
 
 Run:  python3 onboarding.py        (or:  python3 hub.py onboard)
 
-What it does, in order:
-  1. Explains WHAT the tool does, WHY, and HOW (short).
-  2. Checks the environment and offers to install dependencies.
-  3. Collects identity / experience / compensation / resume / education (same as setup.py).
-  4. GRILLS you with structured, interview-style questions to extract your skills,
-     achievements, target roles, and interview answers.
-  5. Explains exactly how your Gmail is used (OTP reads, ATS account sign-ups,
-     recruiter cold-email drafting/sending) and asks for explicit consent.
-  6. Generates a tailored profile (headline, summary, key skills, elevator pitch,
-     strengths/weaknesses, cold-email draft) and SAVES it locally so you are
-     never asked the same questions again.
+Flow:
+  0. Explain WHAT / WHY / HOW (short).
+  1. RESUME FIRST — ask for your resume PDF, read everything from it.
+     If pypdf is missing we offer to install it.
+  2. REVIEW — show everything we extracted and let you confirm each field:
+        [Enter] keep   [c] change   [s] skip   [d] done = keep ALL remaining
+  3. FILL GAPS — only ask for what the resume didn't contain (compensation,
+     notice period, target roles…).
+  4. SKILLS — confirm/adjust the skills + achievements we detected.
+  5. INTERVIEW — draft your pitch, strengths, weakness, salary answer together.
+  6. GMAIL — explain the 4 uses and ask consent + credentials.
+  7. ENVIRONMENT — flag missing dependencies and offer to install them.
+  8. SAVE — write config/user.json + config/profile.json + config/profile.md.
 
-Everything is written to git-ignored files only:
-    config/user.json    (identity + credentials, chmod 600)
-    config/profile.json (full grilled profile)
-    config/profile.md   (human-readable profile + interview notes)
-    config/resume.md5   (your resume hash)
-    core/.env           (CapSolver key, optional)
+Everything is saved to git-ignored files only. Nothing is uploaded by setup.
 """
 import json
 import os
+import shutil
+import subprocess
 import sys
 
 HUB = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HUB)
 
-from setup import ask, ask_bool, ask_int, chmod600, slugify, derive_resume_filename  # noqa: E402
+from setup import ask, ask_bool, ask_int, chmod600, derive_resume_filename  # noqa: E402
+import resume_parser as rp  # noqa: E402
 
 CFG_PATH = os.path.join(HUB, "config", "user.json")
 PROFILE_PATH = os.path.join(HUB, "config", "profile.json")
 PROFILE_MD = os.path.join(HUB, "config", "profile.md")
 
-IS_WINDOWS = os.name == "nt"
-
 
 def section(n, title):
-    print("\n" + "=" * 64)
+    print("\n" + "=" * 68)
     print(f"  {n}  {title}")
-    print("=" * 64)
+    print("=" * 68)
 
 
 def heading(t):
     print("\n  • " + t)
-
-
-def multi(prompt, options, allow_free=True):
-    """Let the user pick comma-separated option numbers, type free text, or skip."""
-    print(prompt)
-    for i, o in enumerate(options, 1):
-        print(f"    {i:2d}. {o}")
-    v = input("  → numbers (comma-separated), free text, or Enter to skip: ").strip()
-    if not v:
-        return []
-    picked = []
-    for part in v.split(","):
-        part = part.strip()
-        if part.isdigit() and 1 <= int(part) <= len(options):
-            picked.append(options[int(part) - 1])
-        elif part:
-            picked.append(part)
-    if allow_free and not any(p in options for p in picked):
-        # treat entire input as free text list
-        return [x.strip() for x in v.split(",") if x.strip()]
-    return picked
 
 
 def load_json(path):
@@ -85,66 +62,141 @@ def save_json(path, data, secret=False):
         chmod600(path)
 
 
+# ---------------------------------------------------------------- 0. explain
 def explain():
     print("=" * 68)
     print("  🎯 APPLY AUTOPILOT — your personal job-application copilot")
     print("=" * 68)
     print("""
 WHAT IT DOES
-  Finds relevant openings at product companies, verifies they match your profile,
-  applies with YOUR tailored resume, emails recruiters, and tracks everything.
+  Finds relevant openings, verifies they match you, applies with YOUR resume,
+  emails recruiters, and tracks every application.
 
 WHY
-  Job hunting is 80% repetitive form-filling and searching. This automates the
-  repetitive parts (ATS forms, LinkedIn Easy Apply, resume uploads, OTP reads)
-  so you spend your energy on the 20% that matters: choosing roles and talking
-  to recruiters.
+  Job hunting is 80% repetitive form-filling. This automates the repetitive parts
+  (ATS forms, LinkedIn Easy Apply, resume uploads, OTP reads) so you spend your
+  energy on choosing roles and talking to recruiters.
 
-HOW (3 steps, one time)
-  1. This onboarding → builds your profile + explains Gmail use.
-  2. `python3 hub.py install` → installs Python/npm/pi dependencies.
-  3. `python3 hub.py start`  → starts the browser stack; you log in once.
-
-Your data lives ONLY in git-ignored local files (config/user.json + config/profile.json).
-Nothing is uploaded anywhere by the setup itself.
+HOW (we'll do it together now)
+  1. I read your resume → build your profile (you confirm/correct every field).
+  2. You run `python3 hub.py install` → all dependencies.
+  3. `python3 hub.py start` → browser stack; you log in once.
 """)
 
-
-def env_check():
-    section("0/8", "Environment check")
-    ok = True
-    py = sys.executable
-    print(f"  • Python: {py}")
-    for name, cmd in (("node", "node"), ("npx", "npx"), ("pi", "pi")):
-        found = shutil_which(cmd)
-        print(f"  • {name}: {'✅ ' + found if found else '❌ not found'}")
-        if not found:
-            ok = False
-    if not os.path.exists(os.path.join(HUB, ".venv")):
-        print("  • .venv: ❌ not created yet")
-        ok = False
-    else:
-        print("  • .venv: ✅")
-    if not ok:
-        if ask_bool("Some dependencies are missing — run `python3 hub.py install` now?", True):
-            import subprocess
-            subprocess.run([sys.executable, "hub.py", "install"])
-    else:
-        print("  ✅ environment looks good")
+    existing = load_json(CFG_PATH)
+    if existing:
+        print("  ℹ️  An existing config was found. You can keep it or rebuild it.")
+        if not ask_bool("Re-run the full questionnaire?", False):
+            print("  ✅ Keeping existing config. Edit anytime: python3 onboarding.py")
+            return "skip"
+    return "continue"
 
 
-def shutil_which(name):
-    import shutil
-    return shutil.which(name)
+# ---------------------------------------------------------------- 1. resume
+def ensure_pypdf():
+    try:
+        import pypdf  # noqa: F401
+        return True
+    except ImportError:
+        print("  ℹ️  I need the `pypdf` library to read your resume PDF.")
+        if ask_bool("Install pypdf now (small, pure-Python)?", True):
+            r = subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "pypdf"])
+            if r.returncode == 0:
+                print("  ✅ pypdf installed")
+                return True
+        print("  ⚠️  Skipping resume reading — I'll ask you to type the details instead.")
+        return False
 
 
-def collect_identity(cfg):
-    section("1/8", "Identity")
-    cfg["full_name"] = ask("Full name", cfg.get("full_name", "Jane Doe"), required=True)
-    cfg["email"] = ask("Email (used on applications)", cfg.get("email", "jane.doe@example.com"), required=True)
-    cfg["phone"] = ask("Phone (with country code)", cfg.get("phone", "+91 00000 00000"))
-    cfg["location"] = ask("Current city", cfg.get("location", "Bengaluru"))
-    cfg["city"] = cfg["location"]
+def resume_first():
+    section("1/8", "Resume first — I'll read everything from it")
+    default = os.path.join(os.path.expanduser("~"), "Downloads", "Resume.pdf")
+    path = os.path.abspath(os.path.expanduser(ask("Absolute path to your resume PDF", default)))
+    if not os.path.exists(path):
+        print(f"  ⚠️  Not found: {path}")
+        return None, path
+    if not ensure_pypdf():
+        return None, path
+    try:
+        data = rp.parse_pdf(path)
+        data["resume_path"] = path
+        print("\n  ✅ Read your resume. Here's what I extracted:")
+        return data, path
+    except rp.ParseError as e:
+        print(f"  ❌ {e}")
+        return None, path
+
+
+# ---------------------------------------------------------------- 2. review (ABCD)
+def _flat_review_items(data):
+    edu = data.get("education") or {}
+    items = [
+        ("full_name", "Full name", data.get("full_name", "")),
+        ("email", "Email", data.get("email", "")),
+        ("phone", "Phone", data.get("phone", "")),
+        ("location", "Location", data.get("location", "")),
+        ("current_role", "Current role", data.get("current_role", "")),
+        ("years_exp", "Years of experience", str(data.get("years_exp", ""))),
+        ("linkedin_url", "LinkedIn", data.get("linkedin_url", "")),
+        ("github", "GitHub", data.get("github", "")),
+        ("degree", "Degree", edu.get("degree", "")),
+        ("school", "School", edu.get("school", "")),
+        ("edu_year", "Graduation year", edu.get("year", "")),
+        ("summary", "Summary", data.get("summary", "")),
+    ]
+    return items
+
+
+def review_extracted(data):
+    """Show extracted fields and let the user confirm/correct each one (ABCD)."""
+    section("2/8", "Review — confirm or correct what I read")
+    items = _flat_review_items(data)
+    print("  Here's what I extracted from your resume. For each field:")
+    print("    [Enter] ✔ keep   [c] change   [s] skip/clear   [d] done = keep ALL remaining\n")
+
+    result = {}
+    i = 0
+    while i < len(items):
+        key, label, val = items[i]
+        shown = val if val and val != "None" else "(empty)"
+        print(f"  [{i + 1}/{len(items)}] {label}: {shown}")
+        choice = input("      → ").strip().lower()
+        if choice == "":
+            result[key] = val
+            i += 1
+        elif choice == "c":
+            new = input(f"      new {label}: ").strip()
+            result[key] = new if new else val
+            i += 1
+        elif choice == "s":
+            result[key] = ""
+            i += 1
+        elif choice == "d":
+            for k2, _, v2 in items[i:]:
+                result[k2] = v2
+            print("  ✅ Keeping all remaining fields as shown.")
+            break
+        else:
+            print("      (enter=keep · c=change · s=skip · d=done-all)")
+    return result
+
+
+# ---------------------------------------------------------------- 3. gaps
+def fill_gaps(cfg):
+    section("3/8", "Fill the gaps — only what the resume didn't say")
+    req = {
+        "full_name": ("Full name", "Jane Doe"),
+        "email": ("Email", "jane.doe@example.com"),
+        "phone": ("Phone (with country code)", "+91 00000 00000"),
+        "location": ("Current city", "Bengaluru"),
+        "current_role": ("Current / most recent job title", "Senior QA Automation Engineer"),
+        "years_exp": ("Years of experience", "8"),
+    }
+    for key, (label, default) in req.items():
+        if not str(cfg.get(key, "")).strip():
+            cfg[key] = ask(label, default, required=(key in ("full_name", "email")))
+
+    cfg["current_company"] = ask("Current / most recent company", cfg.get("current_company", ""))
     cfg["state"] = ask("State / province", cfg.get("state", "Karnataka"))
     cfg["country"] = ask("Country", cfg.get("country", "India"))
     cfg["postal_code"] = ask("Postal code", cfg.get("postal_code", ""))
@@ -152,24 +204,7 @@ def collect_identity(cfg):
     cfg["dob"] = ask("Date of birth YYYY-MM-DD (optional)", cfg.get("dob", ""))
     cfg["gender"] = ask("Gender (Male/Female/Other)", cfg.get("gender", "Female"))
 
-
-def collect_experience(cfg):
-    section("2/8", "Experience & target roles")
-    cfg["current_role"] = ask("Current / most recent job title", cfg.get("current_role", "Senior QA Automation Engineer"))
-    cfg["current_company"] = ask("Current / most recent company", cfg.get("current_company", ""))
-    cfg["years_exp"] = ask_int("Years of experience", cfg.get("years_exp", 8))
-    heading("Target roles (comma-separated)")
-    target = input("  → e.g. Senior QA Automation Engineer, SDET, QA Lead: ").strip()
-    cfg["target_roles"] = [r.strip() for r in target.split(",") if r.strip()] or [cfg["current_role"]]
-    cfg["target_locations"] = [l.strip() for l in ask(
-        "Target locations (comma-separated)", cfg.get("location", "Bengaluru")).split(",") if l.strip()]
-    cfg["remote_pref"] = ask("Remote / hybrid / onsite preference", cfg.get("remote_pref", "Hybrid"))
-    cfg["linkedin_url"] = ask("LinkedIn profile URL", cfg.get("linkedin_url", "https://www.linkedin.com/in/janedoe"))
-    cfg["github"] = ask("GitHub URL (optional)", cfg.get("github", ""))
-
-
-def collect_compensation(cfg):
-    section("3/8", "Compensation & notice")
+    heading("Compensation & notice (not on a resume)")
     cfg["current_ctc_lpa"] = ask_int("Current CTC in LPA (0 if n/a)", cfg.get("current_ctc_lpa", 0))
     default_exp = round(cfg["current_ctc_lpa"] * 1.22, 1) if cfg.get("current_ctc_lpa") else 30
     cfg["expected_ctc_lpa"] = ask_int("Expected CTC in LPA", cfg.get("expected_ctc_lpa", default_exp))
@@ -178,175 +213,179 @@ def collect_compensation(cfg):
     cfg["last_working_day"] = ask("Last working day YYYY-MM-DD (if serving notice)", cfg.get("last_working_day", ""))
     cfg["availability"] = ask("Availability text for forms", cfg.get("availability", "Immediate"))
 
-
-def collect_resume(cfg):
-    section("4/8", "Resume")
-    default_resume = cfg.get("resume_path") or os.path.join(os.path.expanduser("~"), "Downloads", "Resume.pdf")
-    resume_path = ask("Absolute path to your resume PDF", default_resume)
-    resume_path = os.path.abspath(os.path.expanduser(resume_path))
-    if not os.path.exists(resume_path):
-        print(f"  ⚠️  Not found: {resume_path} — you can fix it later and re-run onboarding.")
-    cfg["resume_path"] = resume_path
-    cfg["resume_filename"] = derive_resume_filename(cfg["full_name"], cfg["current_role"])
-
-
-def collect_education(cfg):
-    section("5/8", "Education")
-    cfg["degree"] = ask("Degree level", cfg.get("degree", "Bachelor"))
-    cfg["discipline"] = ask("Field of study", cfg.get("discipline", "Computer Science"))
-    cfg["school"] = ask("School / university", cfg.get("school", ""))
-    cfg["edu_start_month"] = ask("Start month", cfg.get("edu_start_month", "August"))
-    cfg["edu_end_month"] = ask("End month", cfg.get("edu_end_month", "May"))
-    cfg["edu_start_year"] = ask_int("Start year", cfg.get("edu_start_year", 2013))
-    cfg["edu_end_year"] = ask_int("End year", cfg.get("edu_end_year", 2017))
+    heading("Target roles & preferences")
+    target = ask("Target roles (comma-separated)", cfg.get("current_role", ""))
+    cfg["target_roles"] = [t.strip() for t in target.split(",") if t.strip()] or [cfg["current_role"]]
+    locs = ask("Target locations (comma-separated)", cfg.get("location", "Bengaluru"))
+    cfg["target_locations"] = [l.strip() for l in locs.split(",") if l.strip()]
+    cfg["remote_pref"] = ask("Remote / hybrid / onsite preference", cfg.get("remote_pref", "Hybrid"))
+    cfg["resume_path"] = cfg.get("resume_path") or ask("Resume PDF path (again, if missing)", "")
+    if cfg.get("full_name"):
+        cfg["resume_filename"] = derive_resume_filename(cfg["full_name"], cfg["current_role"])
 
 
-# ---------------------------------------------------------------- the GRILL
-def grill_skills(profile, cfg):
-    section("6/8", "SKILL GRILL — what are you actually good at?")
+# ---------------------------------------------------------------- 4. skills
+def _pick_skills(skills_map):
+    """Show detected skills per category and let the user add/remove."""
+    confirmed = {}
+    for cat, label in [
+        ("languages", "Programming languages"),
+        ("automation_frameworks", "Automation frameworks"),
+        ("api_testing", "API testing tools"),
+        ("performance", "Performance tools"),
+        ("cicd", "CI/CD & DevOps"),
+        ("cloud", "Cloud"),
+        ("databases", "Databases"),
+        ("tools_other", "Other tools / practices"),
+        ("domains", "Domains"),
+    ]:
+        found = skills_map.get(cat, [])
+        print(f"\n  {label}: {', '.join(found) if found else '(none detected)'}")
+        v = input("      add/remove (comma-separated; Enter to keep): ").strip()
+        final = list(found)
+        if v:
+            for part in [p.strip() for p in v.split(",") if p.strip()]:
+                if part.startswith("-"):
+                    final = [x for x in final if x.lower() != part[1:].strip().lower()]
+                elif part and part not in final:
+                    final.append(part)
+        confirmed[cat] = final
+    return confirmed
 
-    profile["languages"] = multi(
-        "\nProgramming languages you can code in:",
-        ["Java", "Python", "JavaScript/TypeScript", "C#", "Go", "Kotlin", "Ruby", "Shell/Bash"])
 
-    profile["automation_frameworks"] = multi(
-        "\nTest-automation frameworks you have USED (not just heard of):",
-        ["Selenium", "Playwright", "Appium", "Cypress", "RestAssured", "WebdriverIO",
-         "TestNG", "JUnit", "Pytest", "Cucumber/BDD"])
-
-    profile["api_testing"] = multi(
-        "\nAPI / backend testing tools:",
-        ["Postman", "REST Assured", "SOAP UI", "GraphQL", "gRPC", "Karate"])
-
-    profile["performance"] = multi(
-        "\nPerformance / load testing tools:",
-        ["JMeter", "k6", "Gatling", "Locust", "LoadRunner"])
-
-    profile["cicd"] = multi(
-        "\nCI/CD & DevOps:",
-        ["Jenkins", "GitHub Actions", "GitLab CI", "CircleCI", "Azure DevOps", "Docker", "Kubernetes"])
-
-    profile["cloud"] = multi(
-        "\nCloud platforms:",
-        ["AWS", "GCP", "Azure", "None / on-prem only"])
-
-    profile["databases"] = multi(
-        "\nDatabases:",
-        ["SQL (any)", "PostgreSQL", "MySQL", "MongoDB", "Oracle", "NoSQL general"])
-
-    profile["tools_other"] = multi(
-        "\nOther tools / practices:",
-        ["JIRA", "TestRail", "Zephyr", "Agile/Scrum", "Mobile testing (iOS/Android)",
-         "Security testing", "Accessibility testing", "Git"])
-
-    profile["domains"] = multi(
-        "\nDomains you have worked in:",
-        ["Fintech/Payments", "Healthcare", "E-commerce/Retail", "SaaS/B2B", "Telecom",
-         "Gaming", "Logistics", "Media/Streaming"])
-
-    # quantified achievements
-    heading("Achievements (the interview gold)")
-    print("  Recruiters want NUMBERS. Answer in the form: 'did X → saved/reduced Y by Z%'.")
+def review_skills(profile, data):
+    section("4/8", "Skills — confirm what I detected")
+    profile["skills"] = _pick_skills((data.get("skills") or {}))
+    ach = data.get("achievements") or []
+    if ach:
+        print("\n  Achievements detected (you can edit):")
+        for i, a in enumerate(ach, 1):
+            print(f"    {i}. {a}")
+    else:
+        print("\n  No achievements detected — add a few with numbers (interview gold).")
     profile["achievements"] = []
     for i in range(1, 4):
-        a = input(f"  Achievement {i} (Enter to stop): ").strip()
-        if not a:
+        default = ach[i - 1] if i - 1 < len(ach) else ""
+        a = input(f"  Achievement {i}" + (f" [{default}]" if default else "") + ": ").strip() or default
+        if a:
+            profile["achievements"].append(a)
+        elif not default and i > 1:
             break
-        profile["achievements"].append(a)
-
-    certs = input("  Certifications (comma-separated, e.g. ISTQB, AWS SAA; Enter for none): ").strip()
+    certs = input("  Certifications (comma-separated; Enter for none): ").strip()
     profile["certifications"] = [c.strip() for c in certs.split(",") if c.strip()]
 
-    profile["years_exp"] = int(cfg.get("years_exp") or 0)
 
-
+# ---------------------------------------------------------------- 5. interview
 def grill_interview(profile, cfg):
-    section("7/8", "INTERVIEW GRILL — let's write your answers together")
-    print("  (You'll thank yourself later — these become your cheat sheet.)")
-
-    profile["pitch"] = ask(
-        "Tell me about yourself (2-3 sentences, or press Enter and I'll draft one for you):", "")
+    section("5/8", "Interview — let's write your answers together")
+    profile["pitch"] = ask("Tell me about yourself (Enter and I'll draft one):", "")
     profile["strengths"] = ask("Top 2-3 strengths:", "")
-    profile["weakness"] = ask("A real weakness + how you're working on it:", "")
+    profile["weakness"] = ask("A real weakness + how you're improving:", "")
     profile["why_leave"] = ask("Why are you looking for a change?", "")
     profile["why_hire"] = ask("Why should a company hire YOU (one line)?", "")
     profile["salary_answer"] = ask(
-        "How do you answer 'salary expectation'?", f"{cfg.get('expected_ctc_lpa', 'X')} LPA (slightly negotiable)")
+        "How do you answer 'salary expectation'?",
+        f"{cfg.get('expected_ctc_lpa', 'X')} LPA (slightly negotiable)")
 
 
+# ---------------------------------------------------------------- 6. gmail
 def collect_gmail(profile, cfg):
-    section("8/8", "Gmail access — read this carefully")
+    section("6/8", "Gmail access — read this carefully")
     print("""
-We ask for your Gmail so the agent can do FOUR specific things FOR YOU:
+I use Gmail for FOUR specific things, only with your consent:
 
-  1. READ OTP / verification codes  — many company ATS sites email a 6-digit code
-     during account sign-up; the agent reads it so you don't copy-paste by hand.
-  2. READ application confirmations  — to VERIFY an application really went through
-     (proof gate) before it is counted as "applied".
-  3. REGISTER / log into company ATS  — Workday/Greenhouse/Lever etc. often need
+  1. READ OTP / verification codes   — company ATS sites email a 6-digit code
+     during account sign-up; I read it so you don't copy-paste by hand.
+  2. READ application confirmations  — to VERIFY an application really went
+     through before I count it as "applied".
+  3. REGISTER / log into company ATS  — Workday/Greenhouse/Lever often need
      account creation with email verification.
-  4. DRAFT and (only if you approve) SEND cold emails to recruiters  — humble,
-     personalized follow-ups with your resume attached.
+  4. DRAFT + (only if you approve) SEND cold emails to recruiters.
 
-Your Gmail password is NEVER stored in this repository. It lives only in the
-git-ignored config/user.json (chmod 600) or in the logged-in browser session.
+Your Gmail password is NEVER stored in the repository — only in this local
+chmod-600 config file or the logged-in browser session.
 """)
-    consent = ask_bool("Do you consent to the agent using Gmail for the above 4 purposes?", True)
+    consent = ask_bool("Do you consent to Gmail for the 4 purposes above?", True)
     profile["gmail_consent"] = consent
     profile["gmail_user"] = ask("Gmail address", cfg.get("email"))
-    profile["gmail_app_pw"] = ask("Gmail App Password (IMAP — optional, enables a faster read path)", "", secret=True)
+    profile["gmail_app_pw"] = ask("Gmail App Password (IMAP — optional, faster reads)", "", secret=True)
     if not consent:
-        print("  ⚠️  Gmail use disabled — OTP/confirmation reads and cold emails will ask you to do them manually.")
+        print("  ⚠️  Gmail disabled — OTP/confirmation reads and cold emails will ask you to do them manually.")
     else:
-        print("  ✅ Gmail consent recorded. You can revoke it anytime by deleting gmail_consent in config/user.json.")
+        print("  ✅ Gmail consent recorded. Revoke anytime by deleting gmail_consent in config/user.json.")
 
-
-def collect_credentials(profile, cfg):
     profile["linkedin_user"] = ask("LinkedIn login email", cfg.get("email"))
     profile["linkedin_pass"] = ask("LinkedIn password (stored locally only)", "", secret=True)
     profile["capsolver_key"] = ask("CapSolver API key (optional, for captchas)", "", secret=True)
 
 
+# ---------------------------------------------------------------- 7. environment
+def env_report():
+    """Return a list of (name, ok, fix) tuples for missing dependencies."""
+    checks = []
+    checks.append((".venv", os.path.exists(os.path.join(HUB, ".venv")),
+                   "python3 hub.py install"))
+    checks.append(("node", bool(shutil.which("node")),
+                   "install from https://nodejs.org (LTS)"))
+    checks.append(("npx", bool(shutil.which("npx")), "bundled with Node.js"))
+    checks.append(("pi (coding agent)", bool(shutil.which("pi")),
+                   "see docs/INSTALL.md to install pi"))
+    checks.append(("tesseract (OCR)", bool(shutil.which("tesseract")),
+                   "brew install tesseract | apt install tesseract-ocr | winget install tesseract"))
+    checks.append(("docker (SearXNG, optional)", bool(shutil.which("docker")),
+                   "install Docker Desktop (optional)"))
+    return checks
+
+
+def env_check():
+    section("7/8", "Environment — missing pieces get flagged")
+    missing = []
+    for name, ok, fix in env_report():
+        print(f"  {'✅' if ok else '❌'} {name}" + ("" if ok else f"  →  {fix}"))
+        if not ok:
+            missing.append((name, fix))
+    if missing:
+        if ask_bool("\nSome dependencies are missing — run `python3 hub.py install` now?", True):
+            subprocess.run([sys.executable, "hub.py", "install"])
+    else:
+        print("\n  ✅ Environment is ready.")
+
+
 # ---------------------------------------------------------------- generation
 def generate_artifacts(cfg, profile):
-    """Fill in the gaps with sensible drafts + build the human-readable profile.md."""
     years = profile.get("years_exp") or cfg.get("years_exp") or 0
     role = cfg.get("current_role") or "QA Engineer"
     company = cfg.get("current_company") or "my current company"
-    langs = ", ".join(profile.get("languages", []) or ["Java", "Python"]) or "Java, Python"
-    frameworks = ", ".join(profile.get("automation_frameworks", []) or ["Selenium", "Playwright"])
-    tools = ", ".join((profile.get("api_testing", []) or ["Postman"]) + (profile.get("cicd", []) or ["CI/CD"]))
+    langs = ", ".join(profile.get("skills", {}).get("languages", []) or ["Java", "Python"]) or "Java, Python"
+    frameworks = ", ".join(profile.get("skills", {}).get("automation_frameworks", []) or ["Selenium", "Playwright"])
+    tools = ", ".join((profile.get("skills", {}).get("api_testing", []) or ["Postman"])
+                      + (profile.get("skills", {}).get("cicd", []) or ["CI/CD"]))
+    domains = profile.get("skills", {}).get("domains", []) or []
 
     if not profile.get("pitch"):
         profile["pitch"] = (f"I'm a {role} with {years}+ years building reliable test automation. "
-                            f"At {company} I work on {profile.get('domains', ['fintech'])[0] if profile.get('domains') else 'product'} "
-                            f"quality using {frameworks}, {langs}, and {tools}. I care about shipping confidence, not just test cases.")
-
+                            f"At {company} I work on {(domains[0] if domains else 'product')} quality using "
+                            f"{frameworks}, {langs}, and {tools}. I care about shipping confidence, not just test cases.")
     if not profile.get("why_hire"):
         profile["why_hire"] = (f"I turn flaky manual QA into fast, deterministic automation "
                                f"({frameworks}, {langs}) and I own quality end-to-end.")
-
     if not profile.get("weakness"):
         profile["weakness"] = "I sometimes over-engineer frameworks; I now timebox design and ship the MVP first."
 
-    # key skills (Naukri 250-char cap)
     all_skills = []
-    for k in ("languages", "automation_frameworks", "api_testing", "performance", "cicd",
-              "cloud", "databases", "tools_other"):
-        all_skills += profile.get(k, []) or []
+    for cat in ("languages", "automation_frameworks", "api_testing", "performance", "cicd",
+                "cloud", "databases", "tools_other"):
+        all_skills += profile.get("skills", {}).get(cat, []) or []
     seen, key_skills = set(), []
     for s in all_skills:
         if s and s.lower() not in seen:
             seen.add(s.lower())
             key_skills.append(s)
     profile["key_skills"] = ", ".join(key_skills)[:249]
-
     profile["headline"] = (f"{role} | {years} yrs | {frameworks} | {langs} | "
-                           f"{profile.get('domains', ['Fintech'])[0] if profile.get('domains') else 'Product'}")
-
+                           f"{(domains[0] if domains else 'Product')}")
     profile["summary"] = profile["pitch"]
 
-    # cold email
     profile["cold_email"] = {
         "subject": f"Application – {role} – {cfg.get('location', '')} – {cfg.get('full_name', '')} ({years} yrs)",
         "body": (
@@ -354,42 +393,42 @@ def generate_artifacts(cfg, profile):
             f"I hope this finds you well. I came across your opening for a {role} and would\n"
             f"love to be considered. I bring {years} years of experience, most recently at\n"
             f"{company}, where I built and maintained {frameworks} automation for "
-            f"{profile.get('domains', ['product'])[0] if profile.get('domains') else 'product'} quality.\n\n"
+            f"{(domains[0] if domains else 'product')} quality.\n\n"
             f"My core skills are {langs}, {frameworks}, and {tools}. My resume is attached.\n\n"
             f"Thank you for your time and consideration.\n\n"
-            f"Warm regards,\n{cfg.get('full_name', '')}\n{cfg.get('phone', '')} · {cfg.get('email', '')}"
-        ),
+            f"Warm regards,\n{cfg.get('full_name', '')}\n{cfg.get('phone', '')} · {cfg.get('email', '')}"),
     }
     return profile
 
 
 def write_profile_md(cfg, profile):
+    sk = profile.get("skills", {})
     lines = [
         "# Your profile (auto-generated by onboarding.py — git-ignored)",
         "",
-        f"## Headline",
+        "## Headline",
         f"`{profile.get('headline', '')}`",
         "",
-        f"## Summary / elevator pitch",
-        f"{profile.get('summary', '')}",
+        "## Summary / elevator pitch",
+        profile.get("summary", ""),
         "",
-        f"## Key skills (Naukri ≤250 chars)",
+        "## Key skills (Naukri ≤250 chars)",
         f"`{profile.get('key_skills', '')}`",
         "",
         "## Strengths",
-        f"{profile.get('strengths', '')}",
+        profile.get("strengths", ""),
         "",
         "## Weakness + improvement",
-        f"{profile.get('weakness', '')}",
+        profile.get("weakness", ""),
         "",
         "## Why I'm looking",
-        f"{profile.get('why_leave', '')}",
+        profile.get("why_leave", ""),
         "",
         "## Why hire me",
-        f"{profile.get('why_hire', '')}",
+        profile.get("why_hire", ""),
         "",
         "## Salary expectation answer",
-        f"{profile.get('salary_answer', '')}",
+        profile.get("salary_answer", ""),
         "",
         "## Achievements",
     ]
@@ -398,7 +437,18 @@ def write_profile_md(cfg, profile):
     lines += [
         "",
         "## Certifications",
-        ", ".join(profile.get("certifications", []) or ["(none)"]) ,
+        ", ".join(profile.get("certifications", []) or ["(none)"]),
+        "",
+        "## Skills by category",
+    ]
+    for cat, label in [("languages", "Languages"), ("automation_frameworks", "Automation"),
+                       ("api_testing", "API testing"), ("performance", "Performance"),
+                       ("cicd", "CI/CD"), ("cloud", "Cloud"), ("databases", "Databases"),
+                       ("tools_other", "Other"), ("domains", "Domains")]:
+        vals = sk.get(cat, []) or []
+        if vals:
+            lines.append(f"- **{label}:** {', '.join(vals)}")
+    lines += [
         "",
         "## Cold email (draft)",
         f"Subject: {profile.get('cold_email', {}).get('subject', '')}",
@@ -413,43 +463,9 @@ def write_profile_md(cfg, profile):
     print(f"  ✅ wrote config/profile.md")
 
 
-def main():
-    explain()
-
-    existing = load_json(CFG_PATH)
-    if existing:
-        print("  ℹ️  Existing config/user.json found — showing redacted summary:")
-        red = {k: ("***" if k in ("linkedin_pass", "gmail_app_pw", "capsolver_key") else v)
-               for k, v in existing.items()}
-        print(json.dumps(red, indent=2, ensure_ascii=False)[:1200])
-        if not ask_bool("Re-run the full questionnaire (re-ask everything)?", False):
-            print("  ✅ Keeping existing config. To edit later: python3 onboarding.py")
-            return
-
-    env_check()
-
-    cfg = dict(existing)
-    profile = load_json(PROFILE_PATH)
-
-    collect_identity(cfg)
-    collect_experience(cfg)
-    collect_compensation(cfg)
-    collect_resume(cfg)
-    collect_education(cfg)
-
-    profile = dict(profile)
-    grill_skills(profile, cfg)
-    grill_interview(profile, cfg)
-    collect_gmail(profile, cfg)
-    collect_credentials(profile, cfg)
-
-    # merge grilled profile into user.json (single source of truth)
-    for k, v in profile.items():
-        cfg[k] = v
-    cfg["gmail_consent"] = profile.get("gmail_consent", True)
-
-    generate_artifacts(cfg, profile)
-
+# ---------------------------------------------------------------- 8. save + finish
+def save_and_finish(cfg, profile):
+    section("8/8", "Save & summary")
     save_json(CFG_PATH, cfg, secret=True)
     save_json(PROFILE_PATH, profile, secret=True)
     write_profile_md(cfg, profile)
@@ -459,13 +475,86 @@ def main():
     print("=" * 68)
     print(f"  • config/user.json     (identity + credentials, chmod 600)")
     print(f"  • config/profile.json  (skills, achievements, interview answers)")
-    print(f"  • config/profile.md    (human-readable — open this to review)")
+    print(f"  • config/profile.md    (your profile + interview cheat sheet — open this!)")
     print(f"  • resume upload name:  {cfg.get('resume_filename', '')}")
-    print("\nNext steps:")
-    print("  1. python3 hub.py install")
-    print("  2. python3 hub.py start")
-    print("  3. python3 hub.py health")
-    print("\nTo edit your profile later, just run:  python3 onboarding.py")
+    print(f"  • Gmail consent:       {'✅ yes' if profile.get('gmail_consent') else '❌ no'}")
+
+    print("\n  Your headline:")
+    print(f"    {profile.get('headline', '')}")
+    print("\n  Your summary:")
+    print(f"    {profile.get('summary', '')}")
+
+    print("\n  Next steps:")
+    print("    1. python3 hub.py install")
+    print("    2. python3 hub.py start")
+    print("    3. python3 hub.py health")
+    print("\n  Edit your profile later:  python3 onboarding.py")
+
+
+# ---------------------------------------------------------------- main
+def main():
+    r = explain()
+    if r == "skip":
+        return 0
+
+    data, resume_path = resume_first()
+    if data is None:
+        print("\n  (No problem — I'll ask you directly for everything.)")
+        data = {}
+
+    cfg = {"resume_path": resume_path or ""}
+    profile = {}
+
+    # 2. review extracted (or empty) values
+    if data.get("full_name") or data.get("email"):
+        reviewed = review_extracted(data)
+        cfg["full_name"] = reviewed.get("full_name", "")
+        cfg["email"] = reviewed.get("email", "")
+        cfg["phone"] = reviewed.get("phone", "")
+        cfg["location"] = reviewed.get("location", "")
+        cfg["current_role"] = reviewed.get("current_role", "")
+        cfg["years_exp"] = reviewed.get("years_exp", "")
+        cfg["linkedin_url"] = reviewed.get("linkedin_url", "")
+        cfg["github"] = reviewed.get("github", "")
+        cfg["summary"] = reviewed.get("summary", "")
+        edu = {"degree": reviewed.get("degree", ""), "school": reviewed.get("school", ""),
+               "edu_end_year": reviewed.get("edu_year", "")}
+        for k, v in edu.items():
+            cfg[k] = v
+        profile["skills_hint"] = data.get("skills", {})
+        profile["achievements_hint"] = data.get("achievements", [])
+    else:
+        # no resume / no text — fall back to the classic questions
+        from setup import setup_interactive  # reuse the identity wizard
+        setup_interactive()
+        print("\n  ✅ Identity saved. Re-run onboarding later to add skills/interview answers.")
+        return 0
+
+    # 3. gaps
+    fill_gaps(cfg)
+
+    # 4. skills
+    review_skills(profile, {"skills": profile.get("skills_hint", {}),
+                            "achievements": profile.get("achievements_hint", [])})
+
+    # 5. interview
+    grill_interview(profile, cfg)
+
+    # 6. gmail + creds
+    collect_gmail(profile, cfg)
+
+    # merge into cfg (single source of truth)
+    for k, v in profile.items():
+        cfg[k] = v
+    cfg["gmail_consent"] = profile.get("gmail_consent", True)
+
+    generate_artifacts(cfg, profile)
+
+    # 7. environment
+    env_check()
+
+    # 8. save
+    save_and_finish(cfg, profile)
     return 0
 
 
