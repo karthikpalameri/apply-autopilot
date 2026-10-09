@@ -28,6 +28,10 @@ import subprocess
 import sys
 import time
 
+from core.console import enable_utf8, propagate_utf8_env
+enable_utf8()
+propagate_utf8_env()
+
 HUB = os.path.dirname(os.path.abspath(__file__))
 IS_WINDOWS = os.name == "nt"
 PY = sys.executable

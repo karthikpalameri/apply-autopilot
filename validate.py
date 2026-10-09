@@ -10,6 +10,9 @@ import py_compile
 import re
 import sys
 
+from core.console import enable_utf8
+enable_utf8()
+
 HUB = os.path.dirname(os.path.abspath(__file__))
 
 PATH_RE = re.compile(r"(?:`|^|\s)((?:skills|core|config|apply|find|docs|infra|runtime)/[A-Za-z0-9_./\-]+\.(?:py|md|json|sh|yml|yaml|example))\b", re.M)

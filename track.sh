@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export PYTHONUTF8=1
 # track.sh — one-shot applied vs not-applied reconcile. Optional: pass --gmail to also read inbox.
 # POSIX wrapper around hub.py (cross-platform). Windows: use track.bat
 set -e

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export PYTHONUTF8=1
 # run_li.sh — restart the MCP server (fresh session) + run the LinkedIn listed-company apply pipeline.
 # POSIX only. Windows: use run_li.bat
 set -e

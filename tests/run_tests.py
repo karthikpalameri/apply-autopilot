@@ -11,6 +11,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
+from core.console import enable_utf8  # noqa: E402
+enable_utf8()
+
 loader = unittest.TestLoader()
 suite = loader.discover(HERE, pattern="test_*.py")
 runner = unittest.TextTestRunner(verbosity=2)
