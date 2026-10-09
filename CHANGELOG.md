@@ -7,25 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.0.2] — 2026-10-09
-
-Patch release fixing the CI pipeline and making the scripts safe on the Windows
-`cp1252` console.
-
-### Fixed
-- **CI privacy job** no longer fails on its own pattern (the workflow file is excluded
-  from the `git grep` self-scan).
-- **Windows `UnicodeEncodeError`**: entry points now force UTF-8 stdout/stderr, so
-  emoji output (`✅` / `⚠️` / `→`) no longer crashes the default Windows console.
-- `tests/run_tests.py` puts the repo root on `sys.path` before importing `core`.
-
-### Added
-- `core/console.py` — shared `enable_utf8()` + `propagate_utf8_env()` helpers.
-- `tests/test_console.py` — cross-platform UTF-8 guard tests.
-- `PYTHONUTF8=1` exported by the `.bat` / `.sh` wrappers and the CI env.
-
----
-
 ## [0.0.1] — 2026-10-09
 
 First public release. A generic, cross-platform (macOS / Linux / Windows)
@@ -47,15 +28,21 @@ job-application automation repo that ships with **zero personal data**.
 - **Private web search**: local SearXNG with JSON API (`infra/searxng/setup.py`).
 - **Readiness evaluator** (`eval.py`): weighted test cases → % success rate + fixes.
 - **Repo validator** (`validate.py`): compiles every `.py` + verifies skill links.
-- **Test suite** (`tests/`): 43 stdlib-`unittest` tests across skills, code, parsing,
-  onboarding, installer, MCP config, eval weights, SearXNG, headed-browser, and the
-  first-run guard.
+- **Test suite** (`tests/`): 46 stdlib-`unittest` tests across skills, code, parsing,
+  onboarding, installer, MCP config, eval weights, SearXNG, headed-browser, the
+  first-run guard, and cross-platform console safety.
 - **pi integration**: packages manifest (`pi-mcp-adapter`, `pi-web-access`,
   `context-mode`) + `ctx-*` skills + MCP/web-search config generation.
 - **First-run guard** (`hub.py`): a fresh clone detects the missing `config/user.json`
   and offers to launch onboarding.
+- **CI** (`.github/workflows/ci.yml`): matrix over macOS / Linux / Windows × Python
+  3.10–3.13 running `validate.py` + the test suite, plus a privacy scan that fails the
+  build if any personal data or personal config is tracked.
+- **Cross-platform hygiene**: `core/console.py` forces UTF-8 stdio (so emoji output
+  never crashes the Windows `cp1252` console); `.gitattributes` normalizes line endings
+  (CRLF for `*.bat`, LF elsewhere); `PYTHONUTF8=1` exported by the wrappers + CI.
 - **Docs**: `README.md`, `AGENTS.md`, `PRIVACY.md`, `docs/INSTALL.md`,
-  `docs/DEPENDENCIES.md`.
+  `docs/DEPENDENCIES.md`, MIT `LICENSE`.
 
 ### Security
 - All personal identifiers removed from both the working tree **and** the entire git
@@ -63,5 +50,4 @@ job-application automation repo that ships with **zero personal data**.
 - No secrets, passwords, recruiter emails, CTC figures, addresses, or employer names
   are present anywhere in the repository.
 
-[0.0.2]: https://github.com/karthikpalameri/apply-autopilot/releases/tag/v0.0.2
 [0.0.1]: https://github.com/karthikpalameri/apply-autopilot/releases/tag/v0.0.1
