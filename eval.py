@@ -168,7 +168,7 @@ def build_cases():
     # 5. System tools — 10
     def c_tess():
         return bool(which("tesseract")), (which("tesseract") or "missing")
-    cases.append(("sys.tesseract", "tesseract (OCR)", 6, c_tess,
+    cases.append(("sys.tesseract", "tesseract (OCR)", 5, c_tess,
                   "brew install tesseract | apt install tesseract-ocr | winget install UB-Mannheim.TesseractOCR"))
 
     def c_git():
@@ -180,16 +180,29 @@ def build_cases():
     cases.append(("sys.docker", "docker (SearXNG, optional)", 2, c_docker,
                   "install Docker Desktop (optional)"))
 
-    # 6. Runtime — 10
+    def c_searxng():
+        try:
+            import urllib.request
+            req = urllib.request.Request("http://127.0.0.1:8080/search?q=test&format=json",
+                                         headers={"Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                ok = resp.status == 200 and resp.read().strip()
+            return ok, ("reachable" if ok else "no answer")
+        except Exception as e:
+            return False, "not running"
+    cases.append(("sys.searxng", "SearXNG web search :8080 (optional)", 3, c_searxng,
+                  "python3 infra/searxng/setup.py"))
+
+    # 6. Runtime — 8
     def c_ctl():
         ok = port_open(9000)
         return ok, ("reachable" if ok else "not running")
-    cases.append(("run.ctl", "ctl bridge :9000 running", 5, c_ctl, "python3 hub.py start"))
+    cases.append(("run.ctl", "ctl bridge :9000 running", 4, c_ctl, "python3 hub.py start"))
 
     def c_mcp():
         ok = port_open(3000)
         return ok, ("reachable" if ok else "not running")
-    cases.append(("run.mcp", "cloakbrowser-mcp :3000 running", 5, c_mcp, "python3 hub.py start"))
+    cases.append(("run.mcp", "cloakbrowser-mcp :3000 running", 4, c_mcp, "python3 hub.py start"))
 
     return cases
 

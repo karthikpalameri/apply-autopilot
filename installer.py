@@ -229,7 +229,7 @@ def install_pi():
 
 def configure_pi():
     """Write ~/.pi/agent/mcp-adapter.json + ~/.pi/web-search.json (absolute paths)."""
-    print("\n[5/5] pi MCP + web-search config")
+    print("\n[5/6] pi MCP + web-search config")
     agent_dir = os.path.expanduser("~/.pi/agent")
     os.makedirs(agent_dir, exist_ok=True)
     profile_dir = os.path.join(HUB, "runtime", "mcp-session")
@@ -254,6 +254,21 @@ def configure_pi():
     print("  (restart pi after this)")
 
 
+def setup_searxng(interactive=True):
+    """Optional: private local web search (SearXNG) via docker — see skills/searxng/SKILL.md."""
+    print("\n[6/6] SearXNG — private local web search (https://github.com/searxng/searxng)")
+    if not which("docker"):
+        print("  ⏭️  docker not present — skipping SearXNG (install Docker, then:")
+        print("     python3 infra/searxng/setup.py)")
+        return
+    if interactive:
+        ans = input("  Set up SearXNG now (private web search on :8080)? [y/N]: ").strip().lower()
+        if ans not in ("y", "yes"):
+            print("  ⏭️  Skipped. Later: python3 infra/searxng/setup.py")
+            return
+    run([sys.executable, os.path.join("infra", "searxng", "setup.py")])
+
+
 def run_all(interactive=True):
     print("=" * 68)
     print("  INSTALL — Apply Autopilot (interactive, cross-platform)")
@@ -263,6 +278,7 @@ def run_all(interactive=True):
     install_npm()
     install_pi()
     configure_pi()
+    setup_searxng(interactive)
     print("\n" + "=" * 68)
     print("  ✅ Install finished.")
     print("  Next:  python3 hub.py onboard  →  python3 hub.py start  →  python3 hub.py eval")

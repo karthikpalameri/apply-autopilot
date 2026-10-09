@@ -23,6 +23,11 @@ ATS detected → recipe:
 ## BROWSER STATE
 - Follow `skills/SKILL.md` → **TWO-TAB SESSION**. FORM stays on the application; GMAIL is the only OTP/confirmation tab.
 
+## WEB SEARCH (context)
+- If you need to search anything (verify a company, find a recruiter, check a job board),
+  use local SearXNG at `http://127.0.0.1:8080` — skill: `skills/searxng/SKILL.md`
+  (https://github.com/searxng/searxng). Query: `curl 'http://127.0.0.1:8080/search?q=...&format=json'`.
+
 ## SESSION START GATE — DO NOT SKIP
 → **`skills/SKILL.md#session-start-gate`** (single source). Cache three tuples, classify `DUPLICATE`/`MISMATCH`/`READY`/`BLOCKED` before opening any ATS; incomplete gate ⇒ next action is preflight.
 
@@ -98,7 +103,7 @@ For the requested LinkedIn batch, identify three candidate roles, then check eac
 
 ## RELATED (skill graph — every node is one click away)
 - **Master:** `skills/SKILL.md` · **Reference:** `skills/REFERENCE.md` · **Reliability:** `skills/RELIABILITY.md`
-- **Nodes:** `apply` · `email` · `find` · `learn` · `ops` · `resume` · `track` · `verify` (each `skills/<node>/SKILL.md`)
+- **Nodes:** `apply` · `email` · `find` · `learn` · `ops` · `resume` · `searxng` · `track` · `verify` (each `skills/<node>/SKILL.md`)
 - **Recipes:** `skills/recipes/` — workday · greenhouse · lever · icims · linkedin · phenom · breezy · jobvite · oraclehcm · email-template-humble
 - **Lessons:** `skills/LESSONS/LESSONS-*.md` — apply · find · verify · email · ops · naukri-profile
 - **Index:** `skills/README.md` · **Repo entry for agents:** `AGENTS.md`

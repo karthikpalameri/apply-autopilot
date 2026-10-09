@@ -86,7 +86,7 @@ apply/              ← apply drivers (li_drive, ih_sweep, fill_gh_fast, li_list
 find/               ← job discovery (prod_sweep, sweep, product_companies_builder, tracker_reconcile)
 config/             ← answers.py (A dict), user.json.example, data/ (company seed), pi config templates
 runtime/server.py   ← ctl bridge :9000 (the ONLY tracked file under runtime/)
-infra/searxng/      ← local private web search (docker compose)
+infra/searxng/      ← local private web search: setup.py (auto-setup) + docker-compose + README
 archive/scripts/    ← one-off per-company apply scripts (legacy reference; read its README)
 skills/             ← the skill graph (see below)
 product_companies.md← 500-company product list (websites + LinkedIn)
@@ -116,6 +116,7 @@ Then, per concern (read only the one you need):
 | Track applications | `skills/track/SKILL.md` |
 | Learn / record lessons | `skills/learn/SKILL.md` → `skills/LESSONS/LESSONS-*.md` |
 | Ops (servers/tools) | `skills/ops/SKILL.md` |
+| Web search (private SearXNG) | `skills/searxng/SKILL.md` — if you need searching use http://127.0.0.1:8080 |
 
 **Recipes** (`skills/recipes/`): per-ATS mechanics — `workday`, `greenhouse`, `lever`,
 `icims`, `linkedin`, `phenom`, `breezy`, `jobvite`, `oraclehcm`, `email-template-humble`.
@@ -146,8 +147,10 @@ its `parent` chain once per session — do not re-read unchanged files repeatedl
 1. Read `AGENTS.md` (this file) + `skills/SKILL.md` + `skills/REFERENCE.md` once.
 2. Load `config/user.json` + `config/progress.json` (if present) via `config/answers.py`.
 3. Confirm the browser stack is up (`python3 hub.py health`) before any browser work.
-4. Never invent personal data — resolve everything from `config/answers.py` (`A`).
-5. Proof gate: no success message (DOM/OCR) + confirmation email = NOT "applied".
+4. If you need web search, use local SearXNG at `http://127.0.0.1:8080`
+   (setup: `python3 infra/searxng/setup.py` · skill: `skills/searxng/SKILL.md`).
+5. Never invent personal data — resolve everything from `config/answers.py` (`A`).
+6. Proof gate: no success message (DOM/OCR) + confirmation email = NOT "applied".
 
 ---
 

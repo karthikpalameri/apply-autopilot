@@ -19,6 +19,8 @@ parent: skills/SKILL.md
    - Always verify LIVE — search indexes 404/pull within days
 2. LinkedIn: a11y 1 card → jobs-guest API; verify POSTING company (staffing re-tags)
 3. Naukri SRP: product-heavy only (slice/cashfree/cred/groww...)
+4. **Web search** for portal-only roles — use local SearXNG (`skills/searxng/SKILL.md`):
+   `curl 'http://127.0.0.1:8080/search?q=<product>+QA+SDET+Bengaluru+greenhouse/lever&format=json'`
 
 ## PRODUCT-COMPANY MASTER LIST (500)
 - `product_companies.md` (hub root, human-readable) + `config/data/product_companies.json` (structured)
@@ -50,7 +52,7 @@ parent: skills/SKILL.md
 
 ## RELATED (skill graph — every node is one click away)
 - **Master:** `skills/SKILL.md` · **Reference:** `skills/REFERENCE.md` · **Reliability:** `skills/RELIABILITY.md`
-- **Nodes:** `apply` · `email` · `find` · `learn` · `ops` · `resume` · `track` · `verify` (each `skills/<node>/SKILL.md`)
+- **Nodes:** `apply` · `email` · `find` · `learn` · `ops` · `resume` · `searxng` · `track` · `verify` (each `skills/<node>/SKILL.md`)
 - **Recipes:** `skills/recipes/` — workday · greenhouse · lever · icims · linkedin · phenom · breezy · jobvite · oraclehcm · email-template-humble
 - **Lessons:** `skills/LESSONS/LESSONS-*.md` — apply · find · verify · email · ops · naukri-profile
 - **Index:** `skills/README.md` · **Repo entry for agents:** `AGENTS.md`

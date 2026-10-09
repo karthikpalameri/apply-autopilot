@@ -12,6 +12,7 @@ Usage:
     python3 hub.py track      # applied vs not-applied report (config/progress.json)
     python3 hub.py doctor     # diagnose environment (python/node/pi/ports/config)
     python3 hub.py eval       # readiness evaluation: test cases + % success rate
+    python3 hub.py validate   # repo self-test: compile all .py + verify skill links
     python3 hub.py mcp-config # (re)generate ~/.pi/agent/mcp-adapter.json + web-search.json
 
 This is the recommended entry point on ALL platforms. The run.sh / run_li.sh / track.sh
@@ -149,6 +150,11 @@ def cmd_install():
 def cmd_eval():
     import eval as evaluator
     return 0 if evaluator.evaluate() >= 70 else 1
+
+
+def cmd_validate():
+    import validate
+    return validate.main()
 
 
 def cmd_mcp_config():
@@ -319,6 +325,7 @@ def main():
         "track": cmd_track,
         "doctor": cmd_doctor,
         "eval": cmd_eval,
+        "validate": cmd_validate,
         "mcp-config": cmd_mcp_config,
     }
     if len(sys.argv) < 2 or sys.argv[1] not in cmds:

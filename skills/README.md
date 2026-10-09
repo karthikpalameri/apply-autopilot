@@ -22,12 +22,17 @@
 | Email recruiters (draft → consent → send) | `email/SKILL.md` |
 | Track applied vs not-applied | `track/SKILL.md` |
 | Learn / record lessons | `learn/SKILL.md` |
-| Servers, tools, lean mode, SearXNG | `ops/SKILL.md` |
+| Servers, tools, lean mode | `ops/SKILL.md` |
+| Web search (private SearXNG) | `searxng/SKILL.md` |
 
 ## Recipes — per-ATS mechanics (`recipes/`)
 
 `workday.md` · `greenhouse.md` · `lever.md` · `icims.md` · `linkedin.md` ·
 `phenom.md` · `breezy.md` · `jobvite.md` · `oraclehcm.md` · `email-template-humble.md`
+
+## Web search
+- **`searxng/SKILL.md`** — private local SearXNG (https://github.com/searxng/searxng).
+  If you need searching, use `http://127.0.0.1:8080`; setup: `python3 infra/searxng/setup.py`.
 
 ## Lessons — accumulated learnings (`LESSONS/`)
 

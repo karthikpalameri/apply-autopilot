@@ -100,6 +100,12 @@ If any item is incomplete, stop browser actions and finish preflight first.
 - TRACK → FIND: run find/tracker_reconcile.py before each FIND session (fresh APPLIED.md → dedupe)
 - VERIFY → EMAIL: no ATS? recruiter channel
 - LEARN → APPLY: read LESSONS/LESSONS-apply.md before every apply session
+- FIND → SEARXNG: portal-only roles → `skills/searxng/SKILL.md` (if you need searching, use http://127.0.0.1:8080)
+
+## WEB SEARCH (SearXNG — https://github.com/searxng/searxng)
+- We run a PRIVATE local SearXNG on `http://127.0.0.1:8080` (JSON API, no key, free).
+- **If you need searching, use this.** Setup: `python3 infra/searxng/setup.py` · skill: `skills/searxng/SKILL.md`.
+- Query: `curl 'http://127.0.0.1:8080/search?q=<query>&format=json'`
 
 ## CONSTANTS (single source)
 → **`skills/REFERENCE.md`** — identity (name/DOB/history), CTC (**22% → <current CTC> → <expected CTC>**), **last working day <your last working day> (serving notice)**, resume MD5 `<GENERATED_ON_SETUP>` + filename `Firstname_Lastname_Role.pdf`, saved answers. Resume mechanics: `skills/resume/SKILL.md`. Servers/tools: `skills/ops/SKILL.md`. Tracker: `scratch/APPLIED.md`.
