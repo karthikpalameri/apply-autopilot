@@ -113,3 +113,87 @@ Run `python3 hub.py track` for the applied vs not-applied report.
 ## Privacy & sharing
 
 See `PRIVACY.md` for what was stripped before sharing and how to keep your fork clean.
+
+---
+
+## 🙏 Credits & acknowledgements
+
+**This project is vibe-coded glue.** Almost none of the hard parts are original — it is a
+pile of excellent open-source libraries, tools, protocols, and ideas, wired together to
+solve **one** specific pain point: applying to jobs with *your real* resume, safely,
+verifiably, and without leaking your data. All credit goes to the projects below. 💛
+
+> If you maintain one of these and want different wording or a link, please open an issue.
+
+### 🤖 Agent & runtime glue
+| Project | What we use it for | Link |
+|---|---|---|
+| **pi** (`@earendil-works/pi-coding-agent`) | the coding-agent runtime that drives everything | https://www.npmjs.com/package/@earendil-works/pi-coding-agent |
+| **context-mode** (+ `ctx-*` skills) | agent skills for context/tooling | https://www.npmjs.com/package/context-mode |
+| **pi-mcp-adapter** | pi ↔ MCP bridge | https://www.npmjs.com/package/pi-mcp-adapter |
+| **pi-web-access** | web-search tooling for the agent | https://www.npmjs.com/package/pi-web-access |
+
+### 🌐 Browser automation & MCP
+| Project | What we use it for | Link |
+|---|---|---|
+| **Playwright** | driving the real, **headed** browser | https://playwright.dev |
+| **Playwright MCP** | the HTTP `:3000` browser-tool surface | https://github.com/microsoft/playwright-mcp |
+| **cloak-browser-mcp** (`@devinwangd/cloak-browser-mcp`) | stealth Chromium MCP server | https://www.npmjs.com/package/@devinwangd/cloak-browser-mcp |
+| **Model Context Protocol (MCP)** | the standard tool protocol for agents | https://modelcontextprotocol.io |
+| **Chromium** | the browser itself | https://www.chromium.org |
+
+### 🔎 Search
+| Project | What we use it for | Link |
+|---|---|---|
+| **SearXNG** | private local metasearch + JSON API | https://github.com/searxng/searxng |
+| **Docker** | runs the SearXNG container | https://www.docker.com |
+| **Valkey** | SearXNG's cache backend | https://valkey.io |
+
+### 🧾 Resume, documents & OCR
+- **pypdf** — read/verify resume PDFs — https://github.com/py-pdf/pypdf
+- **Pillow (PIL)** — image handling for OCR screenshots — https://python-pillow.org
+- **pytesseract** — OCR wrapper — https://github.com/madmaze/pytesseract
+- **Tesseract OCR** — the OCR engine — https://github.com/tesseract-ocr/tesseract
+
+### 🕸️ HTTP & TLS
+- **requests** — HTTP for ATS APIs — https://requests.readthedocs.io
+- **certifi** — TLS certificate bundle — https://github.com/certifi/python-certifi
+
+### 🧩 CAPTCHA solving (optional)
+- **CapSolver** — https://www.capsolver.com
+
+### 📨 Email / OTP (stdlib, no third party)
+- **Python** `imaplib` / `smtplib` / `email` — https://www.python.org
+- **Gmail App Passwords** — https://support.google.com/accounts/answer/185833
+
+### 🖥️ System tools & package managers
+- **Python** — https://www.python.org · **Node.js / npm / npx** — https://nodejs.org
+- **Homebrew** (macOS) — https://brew.sh · **apt** (Debian/Ubuntu) — https://wiki.debian.org/Apt · **winget** (Windows) — https://github.com/microsoft/winget-cli
+- **Git** — https://git-scm.com · **Docker** — https://www.docker.com
+
+### 🏢 ATS platforms & public job boards (the things we apply *to*)
+We don't own these — we only talk to their public job boards / APIs.
+- **Greenhouse** — https://www.greenhouse.io (public Boards API)
+- **Lever** — https://www.lever.co (public Postings API)
+- **Workday** — https://www.workday.com · **Phenom** — https://www.phenom.com
+- **iCIMS** — https://www.icims.com · **SAP SuccessFactors** — https://www.sap.com/products/hcm.html
+- **SmartRecruiters** — https://www.smartrecruiters.com · **Ashby** — https://www.ashbyhq.com
+- **Jobvite** — https://www.jobvite.com · **Rippling** — https://www.rippling.com
+- **Oracle HCM (Fusion)** — https://www.oracle.com/human-capital-management/ · **Select2** — https://select2.org
+- Job sources: **LinkedIn** — https://www.linkedin.com · **Naukri** — https://www.naukri.com · **InstaHyre** — https://www.instahyre.com
+
+### 📚 Conventions, docs & tooling we lean on
+- **Keep a Changelog** — https://keepachangelog.com
+- **Semantic Versioning** — https://semver.org
+- **Conventional Commits** — https://www.conventionalcommits.org
+- **Shields.io** (badges) — https://shields.io
+- **MIT License** — https://opensource.org/license/mit
+
+### 💡 Ideas we borrowed
+- The **agent "Skills"** pattern — a folder of `SKILL.md` files the agent reads on demand.
+- **pre-check → act → post-check** transaction discipline, and the **Kaizen** continuous-improvement loop.
+- Public community write-ups on ATS form quirks, browser-automation reliability, and job-search tactics.
+
+### 🛠️ Built with
+- Written collaboratively with an **AI coding agent** (pi) — hence "vibe-coded".
+- No affiliation with, or endorsement by, any company or project listed above.
