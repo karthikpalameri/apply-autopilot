@@ -57,6 +57,14 @@ def _pi_packages():
     return found, True
 
 
+def _pi_skills():
+    d = os.path.expanduser("~/.pi/agent/npm/node_modules/context-mode/skills")
+    if not os.path.isdir(d):
+        return []
+    return sorted(s for s in os.listdir(d)
+                  if s.startswith("ctx-") or s == "context-mode")
+
+
 def load_cfg():
     try:
         with open(CFG, encoding="utf-8") as f:
@@ -148,9 +156,12 @@ def build_cases():
 
     def c_pi_pkgs():
         found, have_pi = _pi_packages()
-        ok = have_pi and len(found) == 3
-        return ok, (", ".join(found) if found else "none" + ("" if have_pi else " (pi missing)"))
-    cases.append(("pi.packages", "pi packages (adapter/web-access/context-mode)", 10, c_pi_pkgs,
+        skills = _pi_skills()
+        ok = have_pi and len(found) == 3 and len(skills) >= 8
+        detail = ", ".join(found) if found else ("none" + ("" if have_pi else " (pi missing)"))
+        detail += f" · {len(skills)} ctx skills"
+        return ok, detail
+    cases.append(("pi.packages", "pi packages + ctx-* skills (adapter/web-access/context-mode)", 10, c_pi_pkgs,
                   "pi install npm:pi-mcp-adapter && pi install npm:pi-web-access && pi install npm:context-mode"))
 
     def c_pi_mcp():

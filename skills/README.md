@@ -15,23 +15,25 @@
 
 | Task | Read |
 |---|---|
-| Exact resume + MD5 gates | `resume/SKILL.md` |
-| Find product-company roles | `find/SKILL.md` |
-| Apply (ATS router → recipe) | `apply/SKILL.md` |
-| Verify submission (proof gate) | `verify/SKILL.md` |
-| Email recruiters (draft → consent → send) | `email/SKILL.md` |
-| Track applied vs not-applied | `track/SKILL.md` |
-| Learn / record lessons | `learn/SKILL.md` |
-| Servers, tools, lean mode | `ops/SKILL.md` |
-| Web search (private SearXNG) | `searxng/SKILL.md` |
+| Exact resume + MD5 gates | `skills/resume/SKILL.md` |
+| Find product-company roles | `skills/find/SKILL.md` |
+| Apply (ATS router → recipe) | `skills/apply/SKILL.md` |
+| Verify submission (proof gate) | `skills/verify/SKILL.md` |
+| Email recruiters (draft → consent → send) | `skills/email/SKILL.md` |
+| Track applied vs not-applied | `skills/track/SKILL.md` |
+| Learn / record lessons | `skills/learn/SKILL.md` |
+| Servers, tools, lean mode | `skills/ops/SKILL.md` |
+| Web search (private SearXNG) | `skills/searxng/SKILL.md` |
 
-## Recipes — per-ATS mechanics (`recipes/`)
+## Recipes — per-ATS mechanics (`skills/recipes/`)
 
-`workday.md` · `greenhouse.md` · `lever.md` · `icims.md` · `linkedin.md` ·
-`phenom.md` · `breezy.md` · `jobvite.md` · `oraclehcm.md` · `email-template-humble.md`
+`skills/recipes/workday.md` · `skills/recipes/greenhouse.md` · `skills/recipes/lever.md` ·
+`skills/recipes/icims.md` · `skills/recipes/linkedin.md` · `skills/recipes/phenom.md` ·
+`skills/recipes/breezy.md` · `skills/recipes/jobvite.md` · `skills/recipes/oraclehcm.md` ·
+`skills/recipes/email-template-humble.md`
 
 ## Web search
-- **`searxng/SKILL.md`** — private local SearXNG (https://github.com/searxng/searxng).
+- **`skills/searxng/SKILL.md`** — private local SearXNG (https://github.com/searxng/searxng).
   If you need searching, use `http://127.0.0.1:8080`; setup: `python3 infra/searxng/setup.py`.
 
 ## Lessons — accumulated learnings (`LESSONS/`)

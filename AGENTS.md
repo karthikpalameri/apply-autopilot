@@ -56,6 +56,7 @@ All entry points are in `hub.py` — use `python3 hub.py <command>` (Windows: `p
 | `track` | applied-vs-not-applied report |
 | `doctor` | environment diagnosis |
 | `eval` | **readiness evaluation** — runs test cases and prints a weighted % success rate + fixes |
+| `test` | run the full test suite in `tests/` (skills, code, logic, mcp, searxng, parsing) |
 | `mcp-config` | regenerate `~/.pi/agent/mcp-adapter.json` + `web-search.json` |
 
 POSIX wrappers: `run.sh`, `run_li.sh`, `track.sh`. Windows: `run.bat`, `run_li.bat`,
@@ -88,6 +89,7 @@ config/             ← answers.py (A dict), user.json.example, data/ (company s
 runtime/server.py   ← ctl bridge :9000 (the ONLY tracked file under runtime/)
 infra/searxng/      ← local private web search: setup.py (auto-setup) + docker-compose + README
 archive/scripts/    ← one-off per-company apply scripts (legacy reference; read its README)
+tests/              ← organized test suite (run: python3 hub.py test) — skills/code/logic/mcp/searxng/parsing/headed
 skills/             ← the skill graph (see below)
 product_companies.md← 500-company product list (websites + LinkedIn)
 ```

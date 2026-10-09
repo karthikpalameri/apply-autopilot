@@ -42,6 +42,16 @@
 `~/.pi/agent/settings.json` → packages: `pi-web-access`, `pi-mcp-adapter`, `context-mode`.
 `hub.py install` installs them; `hub.py mcp-config` writes the config files.
 
+### Skills (shipped by `npm:context-mode`)
+`context-mode` · `ctx-doctor` · `ctx-index` · `ctx-insight` · `ctx-purge` ·
+`ctx-search` · `ctx-stats` · `ctx-upgrade`
+
+### Extensions
+`context-mode:build/adapters/pi/extension.js` · `pi-mcp-adapter` · `pi-web-access:dist`
+
+These are installed automatically by `python3 hub.py install` and verified by
+`python3 hub.py eval` + `python3 hub.py test`.
+
 ## Files to refer (by concern)
 
 | File | Concern |

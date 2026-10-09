@@ -216,13 +216,29 @@ def install_npm():
     run(["npm", "install", "-g", "@devinwangd/cloak-browser-mcp"])
 
 
+# pi packages (extensions) and the skills they ship — kept in sync with eval.py.
+PI_PACKAGES = ["npm:pi-mcp-adapter", "npm:pi-web-access", "npm:context-mode"]
+# Skills provided by npm:context-mode (each becomes a slash-command, e.g. /context-mode:ctx-search)
+PI_SKILLS = ["context-mode", "ctx-doctor", "ctx-index", "ctx-insight", "ctx-purge",
+             "ctx-search", "ctx-stats", "ctx-upgrade"]
+# Extension entry points these packages register
+PI_EXTENSIONS = ["context-mode:build/adapters/pi/extension.js", "pi-mcp-adapter",
+                 "pi-web-access:dist"]
+
+
 def install_pi():
-    print("\n[4/5] pi coding agent + packages")
+    print("\n[4/6] pi coding agent + packages (skills + extensions)")
     if not which("pi"):
         run(["npm", "install", "-g", "@earendil-works/pi-coding-agent"])
     if which("pi"):
-        for pkg in ("npm:pi-mcp-adapter", "npm:pi-web-access", "npm:context-mode"):
+        for pkg in PI_PACKAGES:
             run(["pi", "install", pkg])
+        print("  Skills (from npm:context-mode):")
+        for s in PI_SKILLS:
+            print(f"    • {s}")
+        print("  Extensions:")
+        for e in PI_EXTENSIONS:
+            print(f"    • {e}")
     else:
         print("  ⚠️  pi not available — skipped pi packages")
 

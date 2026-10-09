@@ -13,6 +13,7 @@ Usage:
     python3 hub.py doctor     # diagnose environment (python/node/pi/ports/config)
     python3 hub.py eval       # readiness evaluation: test cases + % success rate
     python3 hub.py validate   # repo self-test: compile all .py + verify skill links
+    python3 hub.py test       # full test suite: skills/code/logic/mcp/searxng/parsing
     python3 hub.py mcp-config # (re)generate ~/.pi/agent/mcp-adapter.json + web-search.json
 
 This is the recommended entry point on ALL platforms. The run.sh / run_li.sh / track.sh
@@ -155,6 +156,10 @@ def cmd_eval():
 def cmd_validate():
     import validate
     return validate.main()
+
+
+def cmd_test():
+    return run([sys.executable, os.path.join("tests", "run_tests.py")], capture=False).returncode
 
 
 def cmd_mcp_config():
@@ -326,6 +331,7 @@ def main():
         "doctor": cmd_doctor,
         "eval": cmd_eval,
         "validate": cmd_validate,
+        "test": cmd_test,
         "mcp-config": cmd_mcp_config,
     }
     if len(sys.argv) < 2 or sys.argv[1] not in cmds:
