@@ -11,6 +11,11 @@ on:
 permissions:
   contents: read
 
+# Force UTF-8 stdio so emoji output doesn't crash Windows' cp1252 console
+env:
+  PYTHONUTF8: "1"
+  PYTHONIOENCODING: utf-8
+
 jobs:
   test:
     name: ${{ matrix.os }} · py${{ matrix.python }}
@@ -54,7 +59,7 @@ jobs:
           if git ls-files | grep -qE '^config/(user\.json|profile\.json|profile\.md|progress\.json|targets\.json|resume\.md5)$'; then
             echo "::error::personal config file is tracked"; exit 1
           fi
-          if git grep -nI -E 'abhishek\.garg|hr@m2pfintech|JioStar2026QA|/Users/kk/' -- . ; then
+          if git grep -nI -E 'abhishek\.garg|hr@m2pfintech|JioStar2026QA|/Users/kk/' -- . ':!.github/workflows/ci.yml' ; then
             echo "::error::personal data found in tracked files"; exit 1
           fi
           echo "privacy scan OK — zero personal data"
