@@ -1,5 +1,11 @@
 # 🎯 Apply Autopilot — automated job applications with *your* resume
 
+[![CI](https://github.com/karthikpalameri/apply-autopilot/actions/workflows/ci.yml/badge.svg)](https://github.com/karthikpalameri/apply-autopilot/actions/workflows/ci.yml)
+[![version](https://img.shields.io/badge/version-0.0.1-blue.svg)](CHANGELOG.md)
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#)
+[![privacy](https://img.shields.io/badge/personal%20data-none%20committed-brightgreen.svg)](PRIVACY.md)
+
 Find QA/SDET (or any role) openings at product companies → verify they match → apply
 with **your** tailored resume → email recruiters → track everything. Cross-platform
 (macOS / Linux / Windows). Zero hardcoded secrets — every personal value lives in a
