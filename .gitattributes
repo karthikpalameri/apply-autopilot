@@ -1,0 +1,36 @@
+# ============================================================================
+#  Apply Autopilot — .gitattributes
+#  Keep line endings consistent across macOS / Linux / Windows.
+# ============================================================================
+
+# Default: normalize to LF in the repo, checkout native per-OS
+* text=auto eol=lf
+
+# Windows batch files must keep CRLF so they run correctly
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# POSIX shell scripts keep LF
+*.sh text eol=lf
+
+# Markdown / config / source = LF
+*.md   text eol=lf
+*.py   text eol=lf
+*.json text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+
+# Binaries — never touch
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.pdf  binary
+*.ico  binary
+*.woff binary
+*.woff2 binary
+
+# Mark generated/vendored paths as non-diffable
+package-lock.json linguist-generated=true
+config/data/product_companies.json linguist-generated=true
+product_companies.md linguist-generated=true

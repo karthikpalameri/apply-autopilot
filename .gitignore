@@ -1,21 +1,32 @@
+# ============================================================================
+#  Apply Autopilot — .gitignore
+# ----------------------------------------------------------------------------
+#  RULE: personal data, secrets, and machine-local state are NEVER committed.
+#  Everything a user creates lives under config/ (git-ignored) or runtime/.
+#  A fresh clone contains ZERO personal data; first run asks for it once.
+# ============================================================================
+
 # ---------------------------------------------------------------------------
-# Secrets & local state — NEVER commit these.
+# 1. Personal identity & credentials  (written by setup.py / onboarding.py)
 # ---------------------------------------------------------------------------
-config/user.json          # YOUR identity + credentials (written by setup.py/onboarding.py)
-config/profile.json       # YOUR grilled profile (skills/achievements/interview answers)
-config/profile.md         # human-readable profile (auto-generated, personal)
-config/resume.md5         # YOUR resume hash
-config/*.pdf              # YOUR resume / attachments
-config/*.bak
-config/mcp_session.json
-config/profile.json
+config/user.json              # name, email, phone, CTC, credentials
+config/profile.json           # grilled profile (skills, achievements, answers)
+config/profile.md             # human-readable profile
+config/resume.md5             # your resume hash
 config/cover_letter.txt
 config/sitekey.txt
-core/.env
-.env
-**/.env
+config/mcp_session.json
+config/*.pdf                  # your resume / attachments
+config/*.bak
+config/*.local.json
 
-# Job tracker (personal application history)
+# keep committed templates/examples
+!config/*.example
+!config/*.example.json
+
+# ---------------------------------------------------------------------------
+# 2. Job triage & application history  (personal)
+# ---------------------------------------------------------------------------
 config/progress.json
 config/applied_vs_not_applied.md
 config/product_companies_tracker.md
@@ -23,31 +34,68 @@ config/li_*.json
 config/targets.json
 scratch/
 
-# Local runtime (browser sessions, cookies, logins, pids)
+# ---------------------------------------------------------------------------
+# 3. Environment & secrets
+# ---------------------------------------------------------------------------
+.env
+**/.env
+core/.env
+infra/searxng/core-config/    # generated SearXNG settings (instance secret)
+
+# ---------------------------------------------------------------------------
+# 4. Local runtime  (browser sessions, cookies, logins, pids, screenshots)
+# ---------------------------------------------------------------------------
 runtime/*
-!runtime/server.py
+!runtime/server.py            # the ctl bridge is tracked; everything else is local
 runtime/pids/
 runtime/mcp-session/
 runtime/session/
 runtime/lseg-mcp-probe/
 runtime/*.json
 logs/
-*.png
 *.log
+*.png
+*.jpg
+*.jpeg
 .playwright-mcp/
 temp/
 
-# SearXNG generated settings (contain the instance secret)
-infra/searxng/core-config/
-
-# Python
-.venv/
+# ---------------------------------------------------------------------------
+# 5. Python
+# ---------------------------------------------------------------------------
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
-# Node
+# ---------------------------------------------------------------------------
+# 6. Node
+# ---------------------------------------------------------------------------
 node_modules/
+npm-debug.log*
+yarn-error.log*
+.npm/
+.pnpm-store/
 
-# OS
+# ---------------------------------------------------------------------------
+# 7. Editors & OS
+# ---------------------------------------------------------------------------
 .DS_Store
+.AppleDouble
 Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
