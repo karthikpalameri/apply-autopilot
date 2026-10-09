@@ -21,11 +21,26 @@ was stripped and the project was made config-driven.
 | Browser scratch snippets (`temp/`) | **Not copied** (full of form-specific PII + passwords) |
 | SearXNG instance secret | **Not copied** — `infra/searxng/core-config/` is git-ignored & regenerated |
 | pi session logs | **Not copied** |
+| Recruiter / company emails (skills/LESSONS) | **Removed** — replaced with `<recruiter@company.com>` templates |
+| Employer names, CTC figures, real job URLs | **Removed** — scripts now read from `config/user.json`; no hardcoded values |
+| Hardcoded passwords in scripts | **Removed** — replaced with `os.environ.get("ATS_PW", "")` / keychain |
+| Skills LESSONS files | Rewritten as **generic templates** (no employer, company, recruiter, or CTC) |
+| Archive script filenames | Renamed to ATS-based generic names (no company names in filenames) |
 
 ## Single source of truth (DRY)
 
 `config/user.json` → `config/answers.py` (`A` dict) → every script.
 Create yours with `python3 hub.py setup`. It is git-ignored and `chmod 600`.
+
+On a fresh clone, running `python3 hub.py` with no arguments detects the missing
+`config/user.json` and **offers to launch guided onboarding** — so a generic user is
+asked once for their details and never again.
+
+## Git history
+
+Personal data was removed from **git history**, not just the working tree: all 7 commits
+were rewritten with `git filter-repo` (`--replace-text` + `--path-rename`) so that blobs,
+filenames, and commit messages contain no personal identifiers.
 
 ## Before you push a fork
 

@@ -318,6 +318,44 @@ def cmd_doctor():
     return 0
 
 
+FIRST_RUN_WELCOME = """
+╭──────────────────────────────────────────────────────────────────────╮
+│  👋  Welcome to Apply Autopilot                                       │
+│                                                                        │
+│  This repo ships with ZERO personal data — no name, email, resume,     │
+│  employer, salary, or credentials. On first run it will ASK you for    │
+│  those (once), store them in config/user.json (git-ignored, chmod 600),│
+│  and never ask again.                                                  │
+╰──────────────────────────────────────────────────────────────────────╯
+"""
+
+
+def is_first_run():
+    """True when the user has not configured their identity yet."""
+    return not os.path.exists(os.path.join(HUB, "config", "user.json"))
+
+
+def maybe_prompt_first_run(command=None):
+    """On a fresh clone, offer guided onboarding. Returns a process code or None."""
+    if not is_first_run():
+        return None
+    if command is not None:
+        # a command that needs identity was requested but nothing is configured
+        print("⚠️  No personal config found (config/user.json missing).")
+        print("    → Run the guided setup first:  python3 hub.py onboard")
+        return 1
+    print(FIRST_RUN_WELCOME)
+    try:
+        ans = input("Run guided onboarding now? [Y/n] ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        ans = "n"
+        print()
+    if ans in ("", "y", "yes"):
+        return cmd_onboard() or 0
+    print("Skipped. Re-run any time with: python3 hub.py onboard")
+    return None
+
+
 def main():
     cmds = {
         "onboard": cmd_onboard,
@@ -334,9 +372,18 @@ def main():
         "test": cmd_test,
         "mcp-config": cmd_mcp_config,
     }
-    if len(sys.argv) < 2 or sys.argv[1] not in cmds:
+    if len(sys.argv) < 2:
+        prompted = maybe_prompt_first_run()
+        if prompted is not None:
+            return prompted
         print(__doc__)
         return 1
+    if sys.argv[1] not in cmds:
+        print(__doc__)
+        return 1
+    # commands that need a configured identity
+    if sys.argv[1] in ("start", "health", "track", "eval") and is_first_run():
+        return maybe_prompt_first_run(command=sys.argv[1]) or 1
     try:
         return cmds[sys.argv[1]]() or 0
     except KeyboardInterrupt:

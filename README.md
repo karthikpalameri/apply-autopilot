@@ -24,6 +24,12 @@ python3 hub.py test       # 6. full test suite (skills/code/logic/mcp/searxng/pa
 Windows users run the same commands (`python` instead of `python3`), or double-click
 `setup.bat` → `install.bat` → `run.bat`.
 
+> **First run:** just `python3 hub.py` (no arguments). The repo ships with **zero
+> personal data** — no name, email, phone, resume, employer, salary, or credentials —
+> so it detects the missing `config/user.json` and offers to launch guided onboarding.
+> Your data is written once to `config/user.json` (git-ignored, `chmod 600`) and you are
+> never asked twice.
+
 `onboarding.py` walks you through it step by step: it asks setup questions, **grills you
 with interview-style questions** to extract your skills/achievements, clearly explains how
 Gmail is used (OTP reads, ATS sign-ups, recruiter cold emails) and asks for consent, then
