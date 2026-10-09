@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Full AcmeEmployer Workday application driver (single-process: server + drive)."""
+"""Full Workday application driver (single-process: server + drive)."""
 import json, socket, subprocess, sys, time, os
 # Legacy example — run from the repo root, or set APPLY_HUB to your checkout path.
 HUB = os.environ.get("APPLY_HUB", os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

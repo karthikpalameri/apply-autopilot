@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One-shot AcmeEmployer Workday application driver.
+"""One-shot Workday application driver.
 Launches server.py in background, then drives the whole flow via the ctl socket.
 Everything in ONE process so the browser stays alive while we work.
 """
@@ -61,7 +61,7 @@ def main():
     if not up:
         print("FATAL server not up"); return
 
-    # Go to Netflix... no, AcmeEmployer apply
+    # Navigate to the employer's Workday apply page
     navigate("https://<tenant>.myworkdayjobs.com/Careers/job/Bengaluru-India/QA-Automation-Engineer_R015451")
     time.sleep(4)
     print("STEP0:", body()[:150].replace("\n", " "))

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""acme-phenom_phenom_step1.py — full fill of Phenom step 1 (trusted selects + real keystrokes)."""
-import json, socket, time, subprocess, sys
+"""phenom_step1_fill.py — full fill of Phenom step 1 (trusted selects + real keystrokes)."""
+import json, socket, time, subprocess, sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config.answers import A
 
 HOST, PORT = "127.0.0.1", 9000
 
@@ -42,9 +44,9 @@ r = ctl({"op": "select", "by": "selector", "name": "#phoneWidget.countryPhoneCod
 print("ccode:", r.get("ok"), r.get("value", ""), flush=True)
 
 # 2) text fields — real keystrokes
-type_field("cntryFields.firstName", "Jane")
-type_field("cntryFields.lastName", "Doe")
-type_field("cntryFields.addressLine1", "<your address>")
+type_field("cntryFields.firstName", A["first"])
+type_field("cntryFields.lastName", A["last"])
+type_field("cntryFields.addressLine1", A["address"])
 type_field("cntryFields.city", "Bengaluru")
 type_field("cntryFields.postalCode", "<postcode>")
 type_field("email", A["email"])

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""fivetran_gh.py — Fivetran Staff SDET (gh_jid=<job-id>) Greenhouse apply.
+"""gh_spa_embed_apply.py — Greenhouse SPA-embed apply (any job).
 Reuses proven GH helpers (ctl/ev/hfill/rs_pick) from fill_gh_fast.py. KISS."""
 import os, json, socket, sys, time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -43,7 +43,7 @@ def rs_pick(qid, target, typed=None):
 def main():
     RESUME_PICK()
     URL = "https://job-boards.greenhouse.io/embed/job_app?for=<org>&token=<job-id>"
-    print("🚀 Fivetran GH apply", flush=True)
+    print("🚀 GH SPA apply", flush=True)
     # page already loaded in browser (GH embed keeps network busy — skip navigate)
     for _ in range(10):
         if ev("() => !!document.getElementById('first_name')") == "true":

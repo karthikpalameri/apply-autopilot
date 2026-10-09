@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""moniepoint_fullfill.py — complete Moniepoint GH apply WITHOUT navigating (form already open).
+"""generic_fullfill.py — complete a GH apply WITHOUT navigating (form already open).
 Fills core + react-selects + availability + md5-gated resume, then SUBMITS.
 Assumes the greenhouse apply form is already open in the ctl browser."""
 import json, socket, time, sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.resume_secure import BEFORE_UPLOAD
+from config.answers import A
 
 def ctl(cmd, timeout=120, wait=0.0):
     s = socket.create_connection(("127.0.0.1", 9000), timeout=timeout)
@@ -34,9 +35,9 @@ def rs_pick(qid, target, retries=4):
 
 def main():
     # core text
-    for fid, val in [("first_name","Jane"),("last_name","Doe"),
-                     ("email","jane.doe@example.com"),("phone","+91 00000 00000"),
-                     ("question_9290119101","linkedin.com/in/janedoe")]:
+    for fid, val in [("first_name",A["first"]),("last_name",A["last"]),
+                     ("email",A["email"]),("phone",A["phone"]),
+                     ("question_9290119101",A["linkedin"])]:
         if hfill(fid, val): print(f"✅ {fid} = {val}")
     # selects
     for qid, target in [("country","India"),("question_9290121101","No"),

@@ -2,7 +2,7 @@
 
 Usage:
     from core.hard_assert import assert_applied
-    proof = assert_applied(b, "AcmeOne")   # raises AssertionError if no positive msg
+    proof = assert_applied(b, "ExampleCo")   # raises AssertionError if no positive msg
 
 Positive patterns (per ATS):
     LinkedIn EA:  "Your application was sent to <Co>", "Applied tab of My Jobs"

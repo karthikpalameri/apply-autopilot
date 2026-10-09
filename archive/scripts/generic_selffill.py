@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""moniepoint_selffill.py — fill Moniepoint GH required react-selects via ctl rs_pick."""
+"""generic_selffill.py — fill GH required react-selects via ctl rs_pick."""
 import json, socket, time
 
 def ctl(cmd, timeout=120, wait=0.0):
@@ -29,7 +29,7 @@ def rs_pick(qid, target, retries=4):
 
 FILLS = [
     ("question_9290120101", "I consent"),       # NDPA Consent
-    ("question_9290121101", "No"),              # previously employed by Moniepoint (re-set)
+    ("question_9290121101", "No"),              # previously employed by this employer (re-set)
     ("question_9290123101", "Yes"),             # build custom test frameworks
     ("question_9290124101", "Yes"),             # integrating testing into CI/CD
     ("question_9290125101", "Yes"),             # writing robust automated tests
@@ -37,7 +37,7 @@ FILLS = [
 ]
 
 def main():
-    print("filling moniepoint required selects + text…", flush=True)
+    print("filling required selects + text…", flush=True)
     # availability is a plain text input
     ctl({"op": "eval", "js": "() => { const i = document.getElementById('question_9290122101'); if (i) { i.focus(); return 1; } return 0; }"})
     time.sleep(0.3)

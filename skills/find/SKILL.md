@@ -41,9 +41,9 @@ parent: skills/SKILL.md
 
 ## DEDUPE
 - Before queueing, check `config/progress.json`, `scratch/APPLIED.md`, LinkedIn's Applied/Job Tracker, and Gmail for existing submissions/confirmations. Cache results for the session.
-- Match normalized company + exact role + LinkedIn/ATS IDs + employer domain and status. An already attempted/confirmed exact role is `DUPLICATE` even if reposted under a new ID; uncertain status means hold/skip until reconciled. This stricter rule prevents repeated applications such as Fivetran.
+- Match normalized company + exact role + LinkedIn/ATS IDs + employer domain and status. An already attempted/confirmed exact role is `DUPLICATE` even if reposted under a new ID; uncertain status means hold/skip until reconciled. This stricter rule prevents repeat applications.
 - A LinkedIn apply URL resolving to another ATS/company domain is `MISMATCH`, never a valid apply route.
-- Dup gate (AcmeTwo): "already submitted / previous application" = NOT new → update the tracker and skip.
+- Dup gate: "already submitted / previous application" = NOT new → update the tracker and skip.
 
 ## LESSONS
 - skills/LESSONS/LESSONS-find.md (append learnings here)

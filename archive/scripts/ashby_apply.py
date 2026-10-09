@@ -45,7 +45,7 @@ def main():
         if "ai tools" in ql: return "Yes - I use AI-assisted testing (Appium AI Plugin, OpenCV) daily."
         if "located" in ql or "50-kilom" in ql: return "Yes - based in Bengaluru"
         if "notice period" in ql: return "Immediate (serving notice — last working day <your last working day>)"
-        if "current ctc" in ql or "current compensation" in ql or "current salary" in ql: return "<expected CTC>"
+        if "current ctc" in ql or "current compensation" in ql or "current salary" in ql: return A["ctc"]
         if "salary" in ql or "expected" in ql or "ctc" in ql: return "<expected CTC>"
         return None
 

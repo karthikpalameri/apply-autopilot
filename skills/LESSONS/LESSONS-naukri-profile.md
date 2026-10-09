@@ -1,7 +1,8 @@
 # NAUKRI PROFILE OPTIMIZATION — skills & settings that get recruiter calls
 
 Concern: how to make the Naukri profile rank in recruiter searches (Resdex) so
-recruiters call / schedule interviews. Applies to `Jane`'s Senior QA/SDET target.
+recruiters call / schedule interviews. Applies to your configured target role
+(see `config/user.json`).
 
 ## WHAT ACTUALLY DRIVES CALLS (research-consistent)
 - Recruiters SEARCH a database (Resdex), they don't scroll. Calls come from being
@@ -33,19 +34,18 @@ recruiters call / schedule interviews. Applies to `Jane`'s Senior QA/SDET target
 
 ## HEADLINE FORMULA (biggest click-lever)
 `[Role] | [Years] yrs | [Top 3-4 skills] | [Company tier] | [Open to]` — <100 chars.
-Jane: "Senior QA Automation Engineer | <years> yrs | Selenium, Appium, API, AWS | <current employer> → SDET Lead, Bangalore"
+Example: "<Role> | <years> yrs | <top skills> | <current employer tier> → <target role>, <city>"
 NO: "Looking for opportunities", "Hard-working", vague "Quality Analyst".
 
 ## SUMMARY (200-300 word pitch)
 Role+years+domain → 3-4 skills → ONE quantified metric → stack → certs → target role.
-Jane's configured cover text already fits this shape; do not probe a missing `config/profile.json`.
+Your configured cover text should already fit this shape; if `config/profile.json` is missing, generate it via onboarding rather than probing for it.
 
 ## OTHER SETTINGS THAT GATE CALLS
 - "Visible to Recruiters" + "Show contact details" = ON (privacy). If off: no calls.
 - Job status = "Immediately looking for a job".
-- Notice period: "Negotiable" or <=15 days gets 3x more calls than 60-90d. Jane is now serving notice (last working day <your last working day>) → set the Naukri notice field to "Negotiable"/"Immediate" (0–15 days), not 60-90d.
-- Expected CTC: never blank; 15-25% above current. **APPLIED: <current CTC> → <expected CTC> (22%)** per research
-  (Reddit anecdote: 37% also got calls; keep <expected CTC> as the call-volume sweet spot).
+- Notice period: "Negotiable" or <=15 days tends to get more calls than 60-90 days. If you are serving notice, set the Naukri notice field to "Negotiable"/"Immediate" (0–15 days).
+- Expected CTC: never blank; set it 15-25% above current. Store the real numbers only in `config/user.json` (git-ignored) — never hardcode them here.
 
 ## FREE "BOOST" CADENCE (matters as much as content)
 - Log in weekly (Recently Active top-of-search)

@@ -10,7 +10,7 @@ parent: skills/SKILL.md
 - ✅ Employer success page/URL captured in the current FORM state: GH `/confirmation` + "Thank you for applying. Your application has been received." · Phenom `/applythankyou` · Lever `/thanks` · Workday `/jobTasks/completed/application` + "Application Submitted" · LinkedIn EA "Applied tab of My Jobs"
 - ✅ Gmail confirmation email naming the exact role ← STRONGEST (esp. LinkedIn Easy Apply)
 - ❌ form-closed + errs=0 ≠ done · "Application submitted/sent" (LinkedIn-only ack) ≠ employer-confirmed → `submitted-awaiting-email` until inbox proof (`confirmed-email`)
-- The positive message VARIES by ATS (Black Duck = "Thank you for your interest…") — OCR/DOM-read the ACTUAL page; never regex-guess. No positive message read = NOT counted. Period.
+- The positive message VARIES by ATS (e.g. "Thank you for your interest…") — OCR/DOM-read the ACTUAL page; never regex-guess. No positive message read = NOT counted. Period.
 
 ## ACTION RELIABILITY
 - Follow `skills/RELIABILITY.md`: pre-check → action → post-check (exact field value/state) on every step. A failed post-check = retry once with a fresh locator, then record the exact blocker.

@@ -1,4 +1,4 @@
-# LEVER RECIPE (proven — AcmeThree + AcmeTwo)
+# LEVER RECIPE (proven)
 
 ## FILL (via one `browser_run_code_unsafe` transaction)
 ```js

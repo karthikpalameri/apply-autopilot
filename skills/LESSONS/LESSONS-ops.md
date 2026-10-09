@@ -25,7 +25,7 @@
 
 ## 2026-09-24 — SOCIAL LOGIN, OTP RATE LIMIT, AND TAB SPEED
 - Prefer visible Gmail/Google sign-in, then LinkedIn sign-in/apply, before ATS email/password and email OTP.
-- OTP state machine is webpage request → one Gmail refresh → enter the fresh code/link. AcmeTwelve returned HTTP 429 after repeated requests; stop on 429 instead of retrying/resending.
+- OTP state machine is webpage request → one Gmail refresh → enter the fresh code/link. A site returned HTTP 429 after repeated requests; stop on 429 instead of retrying/resending.
 - Popup/redirects can reorder or collapse tabs. Create one FORM/VERIFY and one GMAIL tab, re-list once after the transition, map by URL/title, and switch explicitly with `browser_tabs {action:"switch", id}`; close stale duplicates and never navigate FORM to Gmail.
 - Batch stable-page discovery, related actions, and readback in one short `browser_run_code_unsafe` transaction; condition-wait only for the next role-specific anchor.
 
@@ -37,8 +37,8 @@
 - Use one condition wait and one role-specific anchor after navigation/rerender. A fixed timeout is a fallback only. Never repeat an unchanged failed action, reset URL, or tool-discovery call without new state evidence.
 - Refresh tab identity before switching; keep FORM and reusable GMAIL only, and never restart MCP while FORM contains data or CAPTCHA.
 
-## 2026-09-24 — TALENT500 VISUAL IFRAME AND OVERLAY RECOVERY
-- An accessibility snapshot omitted AcmeTwelve's visible `Continue with Google` because it was inside the cross-origin `iframe[title="Sign in with Google Button"]`; inspect a headed screenshot and scoped HTML before concluding that a login provider is unavailable.
+## 2026-09-24 — VISUAL IFRAME AND OVERLAY RECOVERY
+- An accessibility snapshot omitted a site's visible `Continue with Google` because it was inside the cross-origin `iframe[title="Sign in with Google Button"]`; inspect a headed screenshot and scoped HTML before concluding that a login provider is unavailable.
 - The normal recovery was `page.frameLocator('iframe[title="Sign in with Google Button"]').getByRole('button').click()`, then list/remap the popup tab by URL/title, choose the exact Gmail account, and verify account text plus Dashboard/Profile/Logout.
 - A Kestra card click failed with `locator.click: Timeout 30000ms exceeded` because a visible job-search modal intercepted pointer events. Detect the dialog, click its visible close control, reacquire the card locator, and retry once; never force-click through the overlay.
 - Screenshot/OCR and HTML are UI-state corroboration only. Submission proof still requires the employer success state and matching Gmail evidence.

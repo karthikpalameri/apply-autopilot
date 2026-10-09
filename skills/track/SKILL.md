@@ -18,7 +18,7 @@ reconciles the two into one authoritative report.
 - Follow `skills/SKILL.md` → **TWO-TAB SESSION**. `--gmail` reads the reusable GMAIL tab and restores FORM; it never navigates the application tab.
 
 ## BATCH RECONCILIATION (SPEED + NO REPEATS)
-- At session start, reconcile `config/progress.json` and `scratch/APPLIED.md`, inspect LinkedIn Applied/Job Tracker, and search Gmail for prior application evidence before choosing roles. This is a mandatory duplicate gate, especially for repeat-prone employers such as Fivetran.
+- At session start, reconcile `config/progress.json` and `scratch/APPLIED.md`, inspect LinkedIn Applied/Job Tracker, and search Gmail for prior application evidence before choosing roles. This is a mandatory duplicate gate, especially while an application session is in progress.
 - After submissions, capture each employer success page immediately and check Gmail for exact company/role/ATS-ID confirmation. Batch searches are fine when results map unambiguously to each role.
 - Update both trackers after the batch: record every attempt/blocker, preserve `submitted-awaiting-email` separately from `submitted-confirmed`, and write verified proof/status. Never overwrite historical facts or leave new attempts out.
 - Match confirmations by exact company + role/ATS job ID where available. A generic signup/OTP email is not application proof.

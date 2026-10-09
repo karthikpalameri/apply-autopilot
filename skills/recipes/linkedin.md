@@ -9,7 +9,7 @@
 ## FINDING JOBS
 - One scoped DOM extraction for the visible listing page; LinkedIn is virtualized, so use the jobs-guest API/loaded body text for the full card set.
 - Cache the next three `{company, exact role, LinkedIn ID, ATS URL/domain}` tuples and do not rescan unchanged pages.
-- Verify POSTING company (staffing re-tags: "AcmeTen"→"Innova ESI") before opening an ATS.
+- Verify POSTING company (staffing firms re-tag roles under a different employer) before opening an ATS.
 - f_EA unreliable via API; verify Easy Apply controls in the live page.
 
 ## APPLY (easy-apply)
@@ -23,7 +23,7 @@
 - Open the draft card itself and resume only if the job is still accepting applications. If it says **No longer accepting applications**, do not retry or delete it automatically; record it as `blocked`/closed.
 - A visible `Draft` count is the reliable discovery signal; `Applied` is not proof of submission. Submit only after the positive acknowledgement is captured, then Gmail-check and reconcile.
 
-## EASY APPLY (proven — AcmeTwentyFive)
+## EASY APPLY (proven)
 - Modal flow: basics → Next → resume (Upload resume btn → filechooser) → Next/Review → questions → Submit application
 - Fields DOUBLE on reuse (Janejane) + phone gets describe-text concat — ALWAYS clear via browser_press_key Meta+A+Backspace → retype → OCR-verify
 - "How soon can you join? (In days)" = 0 (Immediate — serving notice, LWD <your last working day>)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""apply/zscaler_apply.py <job_url> — Zscaler Greenhouse driver, LABEL-driven (any job).
+"""generic_form_fill.py <job_url> — Greenhouse driver, LABEL-driven (any job).
 Finds fields by question label, not ID. Portal-safe react-selects, real typing, consents."""
 import json, socket, sys, time, re, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -75,7 +75,7 @@ def main(url):
     sel_pick("legal right", "^Yes")
     sel_pick("work permit", "^No")
     sel_pick("How did you learn", "LinkedIn")
-    sel_pick("worked for Zscaler", "never worked")
+    sel_pick("previously worked for this employer", "never worked")
     sel_pick("procurement|government employee", "^No$")
     text_fill("Current Company", "<current employer>")
     text_fill("Current Title", "Senior QA Engineer")

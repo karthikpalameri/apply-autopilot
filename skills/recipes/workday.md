@@ -1,4 +1,4 @@
-# WORKDAY RECIPE (proven — Fox R50033578 + AcmeWorkday)
+# WORKDAY RECIPE (proven)
 
 ## ACCOUNT
 - With user authorization, create/sign in using the approved email and an existing, user-provided, or securely retained credential. If no credential exists and an approved OS keychain/password manager is available, generate a strong unique password, store it there before entry, and retain it through immediate sign-in.

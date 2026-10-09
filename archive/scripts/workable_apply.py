@@ -41,8 +41,8 @@ def main():
       fillI('city','Bengaluru'); fillI('postcode','<postcode>'); fillI('country','India');
       // keyword custom fields (only if empty)
       const kwMap = [
-        [/preferred name/i, 'Jane'], [/mailing address|address/i, '<your address>'],
-        [/linkedin/i, 'https://www.linkedin.com/in/janedoe'], [/salary/i, '35'],
+        [/preferred name/i, A["first"]], [/mailing address|address/i, A["address"]],
+        [/linkedin/i, A["linkedin"]], [/salary/i, str(A["expected_ctc_lpa"])],
         [/work auth/i, 'Yes'], [/start date/i, 'Immediate'], [/hear about/i, 'Job Board'],
         [/how did you hear/i, 'Job Board'], [/current employer/i, '<current employer>'],
         [/experience years|years of experience/i, '8']

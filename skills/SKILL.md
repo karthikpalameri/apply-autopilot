@@ -61,7 +61,7 @@ platforms: [macos, linux, win32]
 ## DEDUPE (READ FIRST — never apply twice)
 - Before every application, check `scratch/APPLIED.md`, `config/progress.json`, LinkedIn's Applied/Job Tracker state, and Gmail for prior submissions or confirmations. These checks are mandatory; never skip them to save time.
 - Match normalized company, exact role, LinkedIn/ATS job IDs, employer domain, and prior status. Same role/company already attempted or confirmed = SKIP, even if a repost/new job ID appears. A different role at the same company is eligible only when it is demonstrably a distinct requisition and not already recorded.
-- If sources conflict or identity/status is uncertain, do not apply; reconcile first. Fivetran is a known repeat-application failure: verify its existing tracker and Gmail history and never reapply to a role already attempted.
+- If sources conflict or identity/status is uncertain, do not apply; reconcile first. Some employers are repeat-application prone: verify the tracker and Gmail history and never reapply to a role already attempted.
 - Keep both trackers authoritative and current: record every attempt/blocker and update status/proof after submissions and Gmail verification; never overwrite historical facts.
 
 ## TWO-TAB SESSION (NON-NEGOTIABLE)
@@ -126,6 +126,6 @@ Every session runs the improvement loop and feeds the next:
 - **A CT** → record APPLIED.md + progress.json (exact date + email proof) → standardize the win into skills → next session starts from the improved baseline.
 Rules that turned sessions around (standardize, never regress):
 - real trusted mouse beats JS .click() on React/custom editors
-- ignore stale "blocked" — re-verify live (false-blockers NetApp, AcmeNine)
+- ignore stale "blocked" — re-verify live (false blockers do happen)
 - web_search/SearXNG finds portal-only product-co QA roles
 - GH/GH split-security-code + .email = repeatable hard win

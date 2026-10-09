@@ -51,7 +51,7 @@ ATS detected → recipe:
 - Replace arbitrary sleeps with one condition wait plus a role-specific anchor assertion. Retry at most once after a fresh locator; a second identical timeout or duplicate match is a blocker until new DOM evidence exists.
 
 ## THREE-ROLE PREFLIGHT (MANDATORY SPEED GATE)
-For the requested LinkedIn batch, identify three candidate roles, then check each against `scratch/APPLIED.md`, `config/progress.json`, LinkedIn Applied/Job Tracker, and Gmail before opening any application. Mark each `DUPLICATE`, `MISMATCH`, `READY`, or `BLOCKED-PENDING-USER`. Apply only when the employer is verified as a substantial-revenue product company or a genuine GCC. Compare `{company, exact role, LinkedIn job ID, ATS job ID, employer domain}`; an already attempted/confirmed exact role is a duplicate even if reposted under a new ID. Fivetran is a known repeat-application warning: check all sources and skip any role already attempted. A LinkedIn card whose Apply URL resolves to a different employer/domain is a mismatch. Missing sensitive identity data such as PAN/Aadhaar/DOB is a blocker; never invent it. For `READY`, cache the exact ATS job ID and route, confirm credential/keychain readiness, then use one FORM tab and the persistent GMAIL tab.
+For the requested LinkedIn batch, identify three candidate roles, then check each against `scratch/APPLIED.md`, `config/progress.json`, LinkedIn Applied/Job Tracker, and Gmail before opening any application. Mark each `DUPLICATE`, `MISMATCH`, `READY`, or `BLOCKED-PENDING-USER`. Apply only when the employer is verified as a substantial-revenue product company or a genuine GCC. Compare `{company, exact role, LinkedIn job ID, ATS job ID, employer domain}`; an already attempted/confirmed exact role is a duplicate even if reposted under a new ID. Some employers are repeat-application prone: check all sources and skip any role already attempted. A LinkedIn card whose Apply URL resolves to a different employer/domain is a mismatch. Missing sensitive identity data such as PAN/Aadhaar/DOB is a blocker; never invent it. For `READY`, cache the exact ATS job ID and route, confirm credential/keychain readiness, then use one FORM tab and the persistent GMAIL tab.
 
 ## ACCOUNT ACCESS (AUTHORIZED — DO NOT SKIP ELIGIBLE ROLES)
 → **`skills/REFERENCE.md#auth-priority`** (single source). Auth order = Google → LinkedIn → email/password → email OTP. Keep FORM + GMAIL tabs; OTP sequence = webpage-request → Gmail refresh → return → enter fresh code. Agent owns the full flow; pause only for CAPTCHA/biometric or a generated password with no approved vault.
@@ -81,8 +81,8 @@ For the requested LinkedIn batch, identify three candidate roles, then check eac
 
 ## LESSONS
 - skills/LESSONS/LESSONS-apply.md
-- SmartRecruiters → external careers site (AcmeSmartRecruiters) → timebox + skip
-- GH school-db combo (no options) = block (AcmeThirteen/AcmeFourteen) → skip
+- SmartRecruiters → external careers site → timebox + skip
+- GH school-db combo (no options) = block → skip
 
 ## AFTER SUBMIT (mandatory)
 - If CAPTCHA appears, first finish all other safe form fields and verify them (about 99% complete); then ask the user to solve it in the visible browser. Never bypass CAPTCHA. After user resolution, resume, submit if still valid, and capture proof. Never claim success without the proof gate.

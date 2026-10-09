@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""apply/acme-workday_resume.py — continue the SAVED AcmeWorkday application (5-step flow, account remembers).
+"""workday_resume_variants.py — continue a SAVED Workday application (5-step flow, account remembers).
 Loops: fix errors (OCR-driven) -> Save & Continue -> Submit -> verify confirmation. ONE session."""
 import sys, os, json, time, re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.browser import McpBrowser
 
-JOB = "https://<tenant>.myworkdayjobs.com/en-US/AcmeWorkday/job/Bengaluru/Senior-Software-Development-Engineer-Test-I_JR10379/apply?source=LinkedIn"
+JOB = "<workday-job-url>/apply?source=LinkedIn"
 b = McpBrowser()
 def snap(): return b.snapshot().get("text","")
 def log(m): print(f"  [{time.strftime('%H:%M:%S')}] {m}", flush=True)
@@ -37,7 +37,7 @@ def save_continue():
     return (r.get("result") if isinstance(r, dict) else r or "")
 
 def main():
-    log("=== AcmeWorkday resume (saved app, loop until submitted) ===")
+    log("=== an employer resume (saved app, loop until submitted) ===")
     b.navigate(JOB); time.sleep(8)
     for loop in range(20):
         t = snap()

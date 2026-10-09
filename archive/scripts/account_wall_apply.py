@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""amz_apply.py <jobid> — Amazon QA apply: selects=Yes, eligibility, submit."""
+"""account_wall_apply.py <jobid> — apply behind an account wall: selects=Yes, eligibility, submit."""
 import json, socket, sys, time
 
 def ctl(cmd, timeout=30):

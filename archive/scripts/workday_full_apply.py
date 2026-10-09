@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""apply/acme-workday_full.py — COMPLETE AcmeWorkday Workday application in ONE session (no resets).
+"""workday_full_apply.py — COMPLETE a Workday application in ONE session (no resets).
 Every step verified. Ends only on the confirmation page / submitted marker.
-Run: .venv/bin/python apply/acme-workday_full.py"""
+Run: .venv/bin/python archive/scripts/workday_full_apply.py"""
 import sys, os, json, time, re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.browser import McpBrowser
 from core.resume_secure import BEFORE_UPLOAD, POST as RESUME_POST, PICK as RESUME_PICK
+from config.answers import A
 
 EMAIL = A["email"]
-PW = os.environ.get("ATS_PW", "")
+PW = os.environ.get("ATS_PW", "")  # set in your shell/keychain; never hardcode a password
 DOB = "<YOUR_DOB>"
-JOB = "https://<tenant>.myworkdayjobs.com/en-US/AcmeWorkday/job/Bengaluru/Senior-Software-Development-Engineer-Test-I_JR10379/apply/autofillWithResume?source=LinkedIn"
+JOB = "<workday-job-url>/apply/autofillWithResume?source=LinkedIn"
 
 b = McpBrowser()
 def snap(): return b.snapshot().get("text","")
@@ -47,10 +48,10 @@ def step_num():
     return int(m.group(2)) + (1 if m.group(1) == "completed" else 0) - (1 if m.group(1) == "completed" else 0)
 
 def main():
-    log("=== AcmeWorkday FULL (one session, loop until submitted) ===")
+    log("=== an employer FULL (one session, loop until submitted) ===")
     RESUME_PICK()
     # SIGN IN
-    b.navigate("https://<tenant>.myworkdayjobs.com/AcmeWorkday/login"); time.sleep(6)
+    b.navigate("https://<tenant>.myworkdayjobs.com/<site>/login"); time.sleep(6)
     t = snap()
     em = re.search(r'textbox "Email Address" \[ref=(\w+)\]', t)
     pw = re.search(r'textbox "Password" \[ref=(\w+)\]', t)
@@ -81,7 +82,7 @@ def main():
             continue
         # ---- STEP 2: My Information ----
         if st == 2:
-            for sel, val in [("input[name='legalName--firstName']", "Jane"), ("input[name='legalName--lastName']", "Doe")]:
+            for sel, val in [("input[name='legalName--firstName']", A["first"]), ("input[name='legalName--lastName']", A["last"])]:
                 b.eval_js("() => { const i=document.querySelector('" + sel + "'); if(i){ i.focus(); i.value=''; } return 1; }"); time.sleep(0.2)
                 b._call("browser_type", {"target": sel, "text": val, "slowly": True}); time.sleep(0.4)
             t = snap()
@@ -130,7 +131,7 @@ def main():
             continue
         # ---- STEP 4: Questions ----
         if st == 4:
-            for ref, val in [(r'textbox \[ref=(f408e2709)\]', "https://www.linkedin.com/in/janedoe"), (r'textbox \[ref=(f408e2727)\]', "<expected CTC>")]:
+            for ref, val in [(r'textbox \[ref=(f408e2709)\]', A["linkedin"]), (r'textbox \[ref=(f408e2727)\]', A["expected"])]:
                 m = re.search(ref, snap())
                 if m: b._call("browser_type", {"target": m.group(1), "text": val, "slowly": True}); time.sleep(0.4)
             t = snap()

@@ -1,6 +1,6 @@
-# PHENOM recipe (AcmePhenom · FIS · Cisco · WBD-careers)
+# PHENOM recipe (proven)
 ## URL: careers.<co>/global|us/en/apply?step=1&stepname=personalInformation
-## WINS: AcmePhenom, Cisco, WBD(redirect), FIS(recaptcha-gated) | FAILS: none with this flow
+## WINS: multiple product companies via this flow | FAILS: none with this flow
 
 ## FILL — one Playwright transaction (`.fill()` + `selectOption()`)
 - Use `browser_run_code_unsafe` with `const { page } = cloak;`; do not use an `async (page) => ...` wrapper.
@@ -16,7 +16,7 @@
 4. Re-select country/device/ccode (resume re-render wipes them).
 5. Experience: resume auto-parses. FIX: degree select = "Bachelor of Engineering"
    (auto-picks "Associates" — wrong), WE1 "currently work here" check, hidden `school` field set.
-6. Questions: selects via selectOption (auth=Yes, sponsor=No, salary=<expected CTC>, join=1-3mo).
+6. Questions: selects via selectOption (auth=Yes, sponsor=No, salary=<expected CTC numeric>, join=1-3mo).
 7. Some questions are REACT-SELECTS disguised as text inputs:
    `click input → ArrowDown → getByRole('option', {name, exact:true}).first().click()`
    (check parent class: `select-shell remix-css...-container`)

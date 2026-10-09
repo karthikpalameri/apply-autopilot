@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ih_click.py — InstaHyre recommended-list click-through apply: card -> overlay -> Apply -> verify."""
+"""instahyre_click.py — InstaHyre recommended-list click-through apply: card -> overlay -> Apply -> verify."""
 import json, socket, time
 
 def ctl(cmd, timeout=30):

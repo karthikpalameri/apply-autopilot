@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""apply/netskope_agentic.py — Netskope Sr SDET (Greenhouse) via the full toolkit + agentic loop.
+"""nested_iframe_apply.py — Greenhouse apply behind a nested iframe via the full toolkit + agentic loop.
 Loops until the confirmation page / submitted marker. ONE session, error-driven."""
 import sys, os, json, time, re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -44,7 +44,7 @@ def success():
 
 def main():
     RESUME_PICK()
-    log("=== Netskope agentic (toolkit loop) ===")
+    log("=== nested-iframe agentic (toolkit loop) ===")
     b.navigate(JOB); time.sleep(7)
     for loop in range(12):
         t = snap()

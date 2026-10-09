@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""apply/acme-workday_agentic.py — AcmeWorkday Workday apply, AGENTIC LOOP until positive confirmation.
+"""workday_agentic_apply.py — Workday apply, AGENTIC LOOP until positive confirmation.
 v2: verify EVERY target before typing; never type into buttons; loop until 'submitted/confirmation'.
-Run: .venv/bin/python apply/acme-workday_agentic.py"""
+Run: .venv/bin/python archive/scripts/workday_agentic_apply.py"""
 import sys, os, json, time, re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.browser import McpBrowser
 from core.resume_secure import BEFORE_UPLOAD, POST as RESUME_POST, PICK as RESUME_PICK
+from config.answers import A
 
 EMAIL = A["email"]
-PW = os.environ.get("ATS_PW", "")
-JOB_URL = "https://<tenant>.myworkdayjobs.com/en-US/AcmeWorkday/job/Bengaluru/Senior-Software-Development-Engineer-Test-I_JR10379/apply/autofillWithResume?source=LinkedIn"
+PW = os.environ.get("ATS_PW", "")  # set in your shell/keychain; never hardcode a password
+JOB_URL = "<workday-job-url>/apply/autofillWithResume?source=LinkedIn"
 
 b = McpBrowser()
 def snap(): return b.snapshot().get("text","")
@@ -56,7 +57,7 @@ def success_marker(t):
     return re.search(r'(submitted|application received|thank you|you have applied|confirmation|successfully applied|application complete|we have received)', t, re.I)
 
 def ensure_login():
-    b.navigate("https://<tenant>.myworkdayjobs.com/AcmeWorkday/login"); time.sleep(6)
+    b.navigate("https://<tenant>.myworkdayjobs.com/<site>/login"); time.sleep(6)
     t = snap()
     em = re.search(r'textbox "Email Address" \[ref=(\w+)\]', t)
     pw = re.search(r'textbox "Password" \[ref=(\w+)\]', t)
@@ -70,7 +71,7 @@ def ensure_login():
     log("sign-in done")
 
 def main():
-    log("=== AcmeWorkday agentic (loop until confirmed) ===")
+    log("=== an employer agentic (loop until confirmed) ===")
     ensure_login()
     b.navigate(JOB_URL); time.sleep(6)
     for loop in range(10):
@@ -95,8 +96,8 @@ def main():
             if cont: b._call("browser_click", {"target": cont.group(1)}); time.sleep(5)
         # STEP 2: My Information
         elif step and step.group(1) == "2":
-            fill_text("input[name='legalName--firstName']", "Jane")
-            fill_text("input[name='legalName--lastName']", "Doe")
+            fill_text("input[name='legalName--firstName']", A["first"])
+            fill_text("input[name='legalName--lastName']", A["last"])
             t = snap()
             for lbl, want in [("Prefix", "Mr."), ("State", "Karnataka"), ("Device Type", "Mobile")]:
                 btn = re.search(rf'button "({re.escape(lbl)}[^"]*Required[^"]*)" \[ref=(\w+)\]', t)
@@ -114,7 +115,7 @@ def main():
         elif step and step.group(1) == "4":
             r = b.eval_js("""() => { const out=[]; for (const i of document.querySelectorAll('input[type=text], textarea')) { const l=i.getAttribute('aria-label')||i.getAttribute('data-automation-id')||''; if (i.offsetParent && l && !(i.value||'').trim()) out.push({sel: "input[aria-label='"+l+"']", l: l.slice(0,30)}); } return JSON.stringify(out.slice(0,8)); }""")
             for f in json.loads(r.get("result") if isinstance(r, dict) else r or "[]"):
-                val = "35" if re.search(r'salary|ctc', f["l"], re.I) else ("0" if "notice" in f["l"].lower() else ("8" if "year" in f["l"].lower() else "I don't wish to answer"))
+                val = str(A["expected_ctc_lpa"]) if re.search(r'salary|ctc', f["l"], re.I) else ("0" if "notice" in f["l"].lower() else (str(A["years"]) if "year" in f["l"].lower() else "I don't wish to answer"))
                 fill_text(f["sel"], val)
             c = re.search(r'button "Continue" \[ref=(\w+)\]', t) or re.search(r'button "Save and Continue" \[ref=(\w+)\]', t)
             if c: b._call("browser_click", {"target": c.group(1)}); time.sleep(5)
@@ -136,8 +137,8 @@ def main():
     m = success_marker(t)
     if m:
         print("✅✅ CONFIRMED: " + m.group(0)); RESUME_POST(); sys.exit(0)
-    open("logs/acme-workday_final_dom.txt","w").write(snap()[-3000:])
-    print("❌ NOT CONFIRMED after 10 loops — final state dumped to logs/acme-workday_final_dom.txt")
+    open("logs/ats_final_dom.txt","w").write(snap()[-3000:])
+    print("❌ NOT CONFIRMED after 10 loops — final state dumped to logs/ats_final_dom.txt")
     sys.exit(1)
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""elastic_selffill.py — fill Elastic GH self-id/ack/right-to-work selects via ctl keys/htype.
+"""selffill_apply.py — fill GH self-id/ack/right-to-work selects via ctl keys/htype.
 Inline rs_pick (the proven greenhouse react-select technique)."""
 import sys, os, json, socket, time
 
@@ -37,7 +37,7 @@ FILLS = [
 ]
 
 def main():
-    print("filling elastic selects via ctl rs_pick…", flush=True)
+    print("filling required selects via ctl rs_pick…", flush=True)
     # right-to-work is a plain text input -> type India directly
     ctl({"op": "eval", "js": "() => { const i = document.getElementById('question_68802921'); if (i) { i.focus(); return 1; } return 0; }"})
     time.sleep(0.3)

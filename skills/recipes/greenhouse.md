@@ -1,4 +1,4 @@
-# GREENHOUSE RECIPE (proven — AKKO ×2 + Netskope + AcmeWorkday-adjacent)
+# GREENHOUSE RECIPE (proven)
 
 ## FILL
 - Basics by name/id: `input[name=first_name]`, `last_name`, `email`, `phone`, `urls[LinkedIn]`

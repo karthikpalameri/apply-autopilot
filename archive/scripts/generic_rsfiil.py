@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""acme-select_rsfiil.py — set AcmeSelect GH react-selects (country/location/start) via ctl rs_pick."""
+"""generic_rsfiil.py — set GH react-selects (country/location/start) via ctl rs_pick."""
 import json, socket, time, os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
