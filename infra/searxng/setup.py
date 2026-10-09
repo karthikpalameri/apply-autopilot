@@ -35,6 +35,14 @@ try:  # Windows-safe UTF-8 console (this script prints emoji)
 except Exception:
     pass
 
+
+def _rel(p):
+    """os.path.relpath that never raises (Windows: cross-drive paths raise ValueError)."""
+    try:
+        return os.path.relpath(p)
+    except ValueError:
+        return p
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ENV = os.path.join(HERE, ".env")
 ENV_EXAMPLE = os.path.join(HERE, ".env.example")
@@ -81,7 +89,7 @@ def compose_cmd():
 def write_env(base=HERE):
     env = os.path.join(base, ".env")
     if os.path.exists(env):
-        log(f"{os.path.relpath(env)} already exists — keeping it")
+        log(f"{_rel(env)} already exists — keeping it")
         return env
     secret = secrets.token_hex(24)
     content = []
@@ -97,14 +105,14 @@ def write_env(base=HERE):
     content.append(f"SEARXNG_SECRET={secret}")
     with open(env, "w") as f:
         f.write("\n".join(content) + "\n")
-    log(f"wrote {os.path.relpath(env)} (random secret)")
+    log(f"wrote {_rel(env)} (random secret)")
     return env
 
 
 def write_settings(base=HERE):
     settings_path = os.path.join(base, "core-config", "settings.yml")
     if os.path.exists(settings_path):
-        log(f"{os.path.relpath(settings_path)} already exists — keeping it")
+        log(f"{_rel(settings_path)} already exists — keeping it")
         return settings_path
     os.makedirs(os.path.dirname(settings_path), exist_ok=True)
     secret = secrets.token_hex(24)
@@ -121,7 +129,7 @@ def write_settings(base=HERE):
     )
     with open(settings_path, "w") as f:
         f.write(settings)
-    log(f"wrote {os.path.relpath(settings_path)} (JSON API enabled)")
+    log(f"wrote {_rel(settings_path)} (JSON API enabled)")
     return settings_path
 
 

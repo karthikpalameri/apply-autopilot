@@ -42,6 +42,22 @@ class TestSearxngSetup(unittest.TestCase):
     def test_constants(self):
         self.assertEqual("http://127.0.0.1:8080", searxng.BASE_URL)
 
+    def test_cross_drive_path_safe(self):
+        # Windows can raise ValueError when relpath crosses drives (C: vs D:);
+        # the setup script must never crash on that.
+        orig = os.path.relpath
+
+        def boom(*a, **k):
+            raise ValueError("path is on mount 'C:', start on mount 'D:'")
+
+        os.path.relpath = boom
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                searxng.write_env(base=d)
+                searxng.write_settings(base=d)
+        finally:
+            os.path.relpath = orig
+
 
 if __name__ == "__main__":
     unittest.main()
