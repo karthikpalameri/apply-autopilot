@@ -5,6 +5,7 @@ import json, socket, sys, time, re, os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 from config.answers import A
+from core.captcha_guard import page_has_captcha
 APPLIED = os.path.join(ROOT, "scratch", "APPLIED.md")
 PROGRESS = os.path.join(ROOT, "config", "progress.json")
 
@@ -92,8 +93,8 @@ def main():
     time.sleep(5)
     for step in range(10):
         body = ev("() => document.body.innerText") or ""
-        if re.search(r"captcha|recaptcha|hcaptcha|verify you are human|security check", body, re.I):
-            print("STOP: CAPTCHA/security check; user must solve it in the visible browser", flush=True)
+        if page_has_captcha(ev, body):
+            print("STOP: CAPTCHA/security check; no submit was clicked. Page left open for you.", flush=True)
             return
         # fill numeric questions if on a questions step (5+ text inputs in modal)
         pts = json.loads(ev(READ_NUMS) or "[]")
@@ -114,6 +115,9 @@ def main():
         d = json.loads(st or "{}")
         print(f"  step {step}: {st}", flush=True)
         if d.get("submit"):
+            if page_has_captcha(ev):
+                print("STOP: CAPTCHA/security check; no submit was clicked. Page left open for you.", flush=True)
+                return
             ev("() => { const b=[...document.querySelectorAll('button')].find(x=>x.offsetParent&&/submit application/i.test((x.innerText||'').trim())); if(b){ b.click(); return 1; } return 0; }")
             time.sleep(8)
             proof = ev("() => document.body.innerText") or ""

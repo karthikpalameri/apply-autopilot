@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """ih_sweep.py <url>... — InstaHyre one-click apply: open job -> Apply -> verify 'Application sent'."""
-import json, socket, sys, time
+import json, socket, sys, time, os
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+from core.captcha_guard import page_has_captcha
 
 def ctl(cmd, timeout=30):
     s = socket.create_connection(("127.0.0.1", 9000), timeout=timeout)
@@ -27,6 +31,8 @@ def apply_one(url):
     if d.get("applied"):
         return "already-applied"
     if d.get("applyCount", 0) > 0:
+        if page_has_captcha(ev, d.get("snip", "")):
+            return "captcha-stop: no click performed; page left open for you"
         ev("() => { const bs=[...document.querySelectorAll('button,a')].filter(x=>x.offsetParent&&/^Apply$/.test((x.innerText||'').trim())); if(bs.length) bs[bs.length-1].click(); return 1; }")
         time.sleep(8)
         st = ev("() => { const t=document.body.innerText.replace(/\\s+/g,' '); return JSON.stringify({applied:/Application sent/i.test(t), snip:t.slice(0,150)}); }")

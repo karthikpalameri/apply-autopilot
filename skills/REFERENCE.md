@@ -106,12 +106,11 @@ return await ci.inputValue();                              // read back in the s
 - **Dynamic forms (Rippling/React):** wait for the application step, inspect `__NEXT_DATA__.props.pageProps.apiData.jobPost.activeJobApplication`, map required questions by UUID/test-id, fill+readback the group (incl. resume filename + radio `aria-checked`) before advancing. Never guess positional generated IDs.
 - **Wait budget:** audit = **2,310 `waitForTimeout` / 2,396.725 s** → condition waits + one short settle, never stacked sleeps.
 
-## SAVED USER-PROVIDED INDIA APPLICATION ANSWERS
-- Work authorization without sponsorship: **Yes** · Temporary authorization requiring future sponsorship: **Yes**
-- Non-compete / employment restrictions: **No** · Other business/employment if hired: **No**
-- Prior Cigna employment / contracting / government-official / employee relationship: **No** (×4)
-- Citizenship status: **Citizen (India)** · Gender: **Male**
-- Terms/privacy consent: confirmed for the **Cigna** application on 2026-09-14 ONLY — never reuse for another employer without a new user confirmation.
+## PERSONAL AND EMPLOYER-SPECIFIC APPLICATION ANSWERS
+- Store candidate-specific eligibility answers only in the user's ignored local config after onboarding; never put them in tracked templates or infer them.
+- Ask the user to answer any unknown legal, work-authorization, conflict-of-interest, or demographic question truthfully.
+- Employer-specific conflict questions and terms/privacy consents must be reviewed for that employer; never reuse consent across employers.
+- CAPTCHA is a hard stop: no solving, bypassing, or automated submit after detection. Leave the headed page open for the user.
 
 ## SPEED PROFILE (session-log-derived)
 - Preflight/dedupe the next 3 roles once; cache `{company, exact role, LinkedIn ID, ATS job ID, employer domain, URL, ATS}`; classify DUPLICATE/MISMATCH/READY/BLOCKED before opening any ATS.

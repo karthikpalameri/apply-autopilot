@@ -37,7 +37,7 @@ parent: skills/SKILL.md
 - **Strict employer gate:** apply only to (a) a product company with credible, verifiable evidence of substantial revenue/scale, or (b) a genuine Global Capability Center (GCC) of an established company. Verify the company and role; do not infer revenue or GCC status from branding. If evidence is unclear, skip it. Staffing, recruiting, consulting, outsourcing, and service vendors do not qualify unless the role is demonstrably within a genuine GCC.
 - The user's next batch is **three eligible LinkedIn jobs**. Source these from LinkedIn Jobs; if fewer than three pass the employer, role-fit, availability, and duplicate gates, report the shortfall rather than lowering the bar.
 - Location: Bangalore/India only (skip Hyderabad/Pune unless remote ok).
-- Closed/410 listings and duplicate applications are non-actionable. CAPTCHA/authentication blockers stop automation; finish all other safe form work first, then ask the user to solve CAPTCHA.
+- Closed/410 listings and duplicate applications are non-actionable. CAPTCHA/authentication blockers stop automation; finish other safe fields if possible, then leave the headed page open. Never solve/bypass CAPTCHA or click/trigger submit after detecting it.
 
 ## DEDUPE
 - Before queueing, check `config/progress.json`, `scratch/APPLIED.md`, LinkedIn's Applied/Job Tracker, and Gmail for existing submissions/confirmations. Cache results for the session.

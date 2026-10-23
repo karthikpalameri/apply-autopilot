@@ -34,7 +34,6 @@ Every personal value lives in **git-ignored local files**, created by the user:
 | `config/user.json` | identity, CTC, resume path, credentials | `python3 hub.py onboard` / `setup` |
 | `config/profile.json` | grilled skills, achievements, interview answers | `onboard` |
 | `config/resume.md5` | resume integrity hash | `onboard` / `setup` |
-| `core/.env` | CapSolver key (optional) | `onboard` / `setup` |
 
 These are **never committed**. The tracked template is `config/user.json.example`.
 Scripts read personal data through `config/answers.py` (`A` dict) — never hardcode a
@@ -82,7 +81,7 @@ onboarding.py       ← resume-first guided setup: read resume → review/confir
                        skills → interview → Gmail consent → env check → generate profile
 resume_parser.py    ← heuristic resume PDF reader (email/phone/links/skills/years/education)
 
-core/               ← browser control, resume gates, gmail read, OCR, capsolver, verify
+core/               ← browser control, resume gates, gmail read, OCR, CAPTCHA guard, verify
 apply/              ← apply drivers (li_drive, ih_sweep, fill_gh_fast, li_listed_apply)
 find/               ← job discovery (prod_sweep, sweep, product_companies_builder, tracker_reconcile)
 config/             ← answers.py (A dict), user.json.example, data/ (company seed), pi config templates
@@ -161,5 +160,6 @@ its `parent` chain once per session — do not re-read unchanged files repeatedl
 - **Gmail** is used ONLY with explicit consent (recorded as `gmail_consent` in
   `config/user.json`): read OTPs, read confirmations, register/log into ATS accounts,
   and draft/send cold emails (drafts by default; sending requires a fresh user approval).
-- **CAPTCHA / biometrics / secrets** are user-only pauses — never bypass.
+- **CAPTCHA is a hard stop:** finish safe non-CAPTCHA fields, then leave the headed page open for the user. Never solve/bypass CAPTCHA and never click or trigger submit after detecting one. No automated submit resumes if one was encountered.
+- **Biometrics / secrets** are user-only pauses — never bypass.
 - Never create duplicate accounts; never store passwords in logs/skills/progress files.

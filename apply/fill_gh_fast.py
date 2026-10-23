@@ -1,11 +1,11 @@
 import os
 #!/usr/bin/env python3
-"""fill_gh_fast.py — FAST Greenhouse fill+submit: tight rs_pick (0.8s), batch text, CapSolver recaptcha override."""
+"""fill_gh_fast.py — Greenhouse form fill; stop before submit if a CAPTCHA is present."""
 import json, socket, sys, time, random
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.answers import A, RESUME
 from core.resume_secure import BEFORE_UPLOAD, POST as RESUME_POST, PICK as RESUME_PICK
-from core.capsolver import solve_recaptcha_v2_enterprise
+from core.captcha_guard import page_has_captcha
 
 def ctl(cmd, timeout=60):
     s = socket.create_connection(("127.0.0.1", 9000), timeout=timeout)
@@ -85,19 +85,11 @@ def main():
     if int(errs or 0) > 0:
         print("STILL MISSING REQUIRED — manual fix needed", flush=True)
         sys.exit(2)
-    # ---- recaptcha enterprise: solve + override execute ----
-    tok = solve_recaptcha_v2_enterprise(
-        "6LfmcbcpAAAAAChNTbhUShzUOAMj_wY9LQIvLFX0",
-        "https://job-boards.greenhouse.io/embed/job_app?for=<org>&token=<job-id>",
-        max_wait=150)
-    print("recaptcha:", "OK" if tok.get("ok") else tok, flush=True)
-    if not tok.get("ok"):
-        print("RECAPTCHA FAILED — manual solve needed", flush=True); sys.exit(3)
-    T = tok["token"]
-    # inject + override execute so Greenhouse's submit gets OUR token
-    ev(f"() => {{ const ta=document.querySelector('textarea[name=g-recaptcha-response]'); if(ta){{ const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set; set.call(ta,'{T}'); ta.dispatchEvent(new Event('input',{{bubbles:true}})); }} if(typeof grecaptcha!=='undefined'&&grecaptcha.enterprise){{ grecaptcha.enterprise.execute=function(sk,opts){{ return Promise.resolve('{T}'); }}; }} return 1; }}")
-    time.sleep(1)
-    # ---- submit ----
+    # ---- CAPTCHA hard stop: no solving, bypass, or automated submit ----
+    if page_has_captcha(ev):
+        print("STOP: CAPTCHA detected. No submit was clicked; page left open for you.", flush=True)
+        sys.exit(3)
+    # ---- submit only when the page is confirmed clear ----
     ev("() => { const b=[...document.querySelectorAll('button, input[type=submit]')].find(x=>x.offsetParent&&/submit/i.test((x.innerText||x.value||'').trim())); if(b){ b.click(); return 'clicked'; } return 'no'; }")
     time.sleep(8)
     st = ev("() => { const f=document.getElementById('application-form'); const t=document.body.innerText.replace(/\\s+/g,' '); return JSON.stringify({formGone:!f, thanks:/thank you for your application|application has been submitted|your application was/i.test(t)}); }")

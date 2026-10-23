@@ -7,7 +7,7 @@ Read once before an apply session. Canonical rules live in **`skills/REFERENCE.m
 - Success strings: GH "Thank you for applying. Your application has been received."; Phenom `/applythankyou?status=success` (+ candidateId); Lever `/thanks`; Workday `/jobTasks/completed/application` + "Application Submitted"; SuccessFactors "Successfully Applied"; UKG "Thank you! Your application was submitted."; LinkedIn EA "Your application was sent to <Co>!" (capture LIVE — unreadable later).
 - Email subjects: "Thank you for applying to X" / "X has your application!" / "We've received your job application". Hard-verify = success page AND inbox email. Statuses: `submitted-confirmed` | `submitted-awaiting-email` | `blocked`.
 - Capture proof IN the current FORM state; never re-visit later (a GH confirmation URL can reload to the plain job page). OCR-read the ACTUAL text — regex variants fail.
-- CAPTCHA after Submit = failed/unverified → user solves it in the **visible** browser; keep the tab active; never bypass or abandon silently. Record exact blocker text + URL.
+- CAPTCHA detected before submit = hard stop → finish safe fields, leave the **visible** page open, and hand off. Never solve/bypass it and never click/trigger submit after detection; do not resume automated submission. Record exact blocker text + URL.
 
 ## FORM WIPE / ONE-SHOT TRANSACTION
 - Navigating between fill and submit wipes client state (GH); Workday accounts save server-side → resume with `/apply`. Zero nav: open → fill → upload → submit.
@@ -34,7 +34,7 @@ Read once before an apply session. Canonical rules live in **`skills/REFERENCE.m
 
 ## ATS ROUTING (typical win-rate: GH embed > Phenom > LinkedIn EA > SuccessFactors > iCIMS)
 - GH standalone embed `/embed/job_app?for=<org>&token=<id>` = cleanest (skip the careers page). SPA wrappers: the iframe is hidden 0×0 until `dispatchEvent('click')` on `a[data-click-target=job-application]`.
-- GH recaptcha auto-passes mostly; invisible v2 needs CapSolver `isInvisible:true` + the EXACT embed URL (stale URL → 400). Some GH SPA submits don't honor the CapSolver token → human 1-click. Escalation = 8-char email code → 8 split inputs `#security-input-0..7` (maxLength=1) → Submit enables.
+- GH CAPTCHA/reCAPTCHA is a hard stop. Do not call a solving service, inject tokens, or submit; leave the headed page open for the user. Escalation = 8-char email code → 8 split inputs `#security-input-0..7` (maxLength=1) → Submit enables only if no CAPTCHA was encountered.
 - iCIMS: a direct job URL redirecting to intro/Welcome is the trap. Real path: iCIMS Search (searchKeyword) → real-mouse job title → detail → Apply → GDPR gate `css_loginName` + `accept_gdpr` (`.check({force:true})`) → Next.
 - SuccessFactors: `/errorpage?errortype=Exception` on deep-links; a working careers host exists. Unknown password: Forgot password → reset URL (preserves `career_job_req_id`) → policy pw (8-18, upper+lower+digit+punct) → login → profile prefills + resume pre-attached. rcmpaginatedselect = mouse-open → option-click.
 - Jobvite: consent select + Submit BEFORE the form; no "LinkedIn" source → "Web Search"; invisible reCAPTCHA may reset after Send.

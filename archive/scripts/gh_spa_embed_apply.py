@@ -5,6 +5,7 @@ import os, json, socket, sys, time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.answers import A, RESUME
 from core.resume_secure import BEFORE_UPLOAD, POST as RESUME_POST, PICK as RESUME_PICK
+from core.captcha_guard import page_has_captcha
 
 def ctl(cmd, timeout=90):
     with socket.create_connection(("127.0.0.1", 9000), timeout=5) as s:
@@ -98,18 +99,10 @@ def main():
     if int(errs or 0) > 0:
         print("STILL MISSING REQUIRED — manual fix needed", flush=True); sys.exit(2)
 
-    # recaptcha sitekey from page + solve
-    sk = ev("() => { const el=document.querySelector('[data-sitekey]'); return el?el.getAttribute('data-sitekey'):''; }")
-    print("sitekey:", sk, flush=True)
-    if sk:
-        from core.capsolver import solve_recaptcha_v2_enterprise
-        tok = solve_recaptcha_v2_enterprise(sk, URL, max_wait=150)
-        print("recaptcha:", "OK" if tok.get("ok") else tok, flush=True)
-        if tok.get("ok"):
-            T = tok["token"]
-            ev(f"() => {{ const ta=document.querySelector('textarea[name=g-recaptcha-response]'); if(ta){{ const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set; set.call(ta,'{T}'); ta.dispatchEvent(new Event('input',{{bubbles:true}})); }} if(typeof grecaptcha!=='undefined'&&grecaptcha.enterprise){{ grecaptcha.enterprise.execute=function(sk,opts){{ return Promise.resolve('{T}'); }}; }} return 1; }}")
-    else:
-        print("⚠️ NO SITEKEY — recaptcha may be invisible; trying submit", flush=True)
+    # CAPTCHA hard stop — never solve or submit when a challenge is present.
+    if page_has_captcha(ev):
+        print("STOP: CAPTCHA detected; no submit was clicked. Page left open for you.", flush=True)
+        return
 
     ev("() => { const b=[...document.querySelectorAll('button, input[type=submit]')].find(x=>x.offsetParent&&/submit/i.test((x.innerText||x.value||'').trim())); if(b){ b.click(); return 'clicked'; } return 'no'; }")
     time.sleep(8)

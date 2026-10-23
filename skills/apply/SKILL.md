@@ -61,7 +61,7 @@ For the requested LinkedIn batch, identify three candidate roles, then check eac
 2. **`PICK()`** (from `core.resume_secure`) — verifies the exact resume + MD5 before opening the form
 3. Fill basics → resume (`BEFORE_UPLOAD()` returns the verified path; setInputFiles that). Copy to hub handled by module.
 4. Questions → error-driven (submit → read errors → fix ONE at a time)
-5. Complete and verify all other safe required fields first (target ~99% of the application); at CAPTCHA, stop automation and ask the user to solve it in the visible browser. Never bypass or solve CAPTCHA. Resume only after the user completes it.
+5. Complete and verify all other safe required fields first (target ~99%); if CAPTCHA is detected, stop, leave the headed page open, and hand off. Never solve/bypass it and never click or trigger submit after detection. Do not resume automated submission even if the user later resolves it.
 6. **`POST()`** (from `core.resume_secure`) after submit — post-verify the uploaded resume still matches the known-good MD5
 7. → VERIFY node (proof gate): employer success/confirmation page **and Gmail confirmation** required
 
@@ -71,13 +71,13 @@ For the requested LinkedIn batch, identify three candidate roles, then check eac
 ## POWER TOOLS (work when nothing else does)
 - `browser_run_code_unsafe` = FULL Playwright via the server-global `cloak` object: `const { page } = cloak; await page.getByRole(...).click(); await page.locator('input[type=file]').setInputFiles(path);` (do not wrap the code as `async (page) => {...}` on this MCP build).
 - `browser_press_key` = the real keyboard tool (browser_keyboard is a phantom name)
-- One-call sequencing: set related fields + read them back in ONE script; submit in that same transaction only when the submit pre-check passes (re-render wipes).
+- One-call sequencing: set related fields + read them back in ONE script. Submit only if no CAPTCHA was detected; if detected, do not click/trigger submit and leave the page open for the user.
 
 ## CTC (always)
 → **`skills/REFERENCE.md#compensation`**: 22% hike = <current CTC> → **<expected CTC>** (numeric fields: `<expected CTC numeric>`); notice = **serving — last working day <your last working day>**.
 
 ## SAVED USER-PROVIDED INDIA APPLICATION ANSWERS
-→ **`skills/REFERENCE.md#saved-user-provided-india-application-answers`** (single source). Reuse matching answers without re-asking; Cigna consent was 2026-09-14 only — never reuse for another employer.
+→ **`skills/REFERENCE.md#personal-and-employer-specific-application-answers`** (single source). Use only user-provided truthful answers; obtain employer-specific consents separately and never reuse them across employers.
 
 ## LESSONS
 - skills/LESSONS/LESSONS-apply.md
@@ -85,7 +85,7 @@ For the requested LinkedIn batch, identify three candidate roles, then check eac
 - GH school-db combo (no options) = block → skip
 
 ## AFTER SUBMIT (mandatory)
-- If CAPTCHA appears, first finish all other safe form fields and verify them (about 99% complete); then ask the user to solve it in the visible browser. Never bypass CAPTCHA. After user resolution, resume, submit if still valid, and capture proof. Never claim success without the proof gate.
+- If CAPTCHA appears, finish other safe fields if possible, then stop automation and leave the visible page open. Never solve/bypass it and never click or trigger submit after detection; do not resume automated submission after a user resolves it. Never claim success without the proof gate.
 - Capture the positive employer final message and URL immediately in the same FORM state; do not navigate away and try to recover proof later.
 - Check Gmail for prior application evidence during dedupe, and check Gmail after submission for confirmation. For this three-role batch, search once after each submission or use a clearly mapped batch search; never use LinkedIn/ATS acknowledgement alone as email proof.
 - Update `config/progress.json` and `scratch/APPLIED.md` for every attempt, blocker, and verified outcome. Preserve historical entries; never silently omit or rewrite them.

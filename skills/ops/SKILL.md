@@ -24,6 +24,10 @@ parent: skills/SKILL.md
 - ctl :9000: `.venv/bin/python runtime/server.py` — dies on profile conflicts; kill via `lsof +D`
 - Lock: `rm -f runtime/mcp-session/.cloakbrowser-mcp-profile.lock` before start
 
+## CAPTCHA HARD STOP
+- Finish safe non-CAPTCHA fields, then stop and leave the headed page open for the user.
+- Never solve/bypass CAPTCHA and never click or trigger submit once a challenge is detected. Do not resume automated submission if the user later resolves it.
+
 ## TAB SAFETY
 - Follow `skills/SKILL.md` → **TWO-TAB SESSION**. `core/gmail_read.py` reuses GMAIL and restores FORM; do not restart MCP during a filled form.
 - **Agent owns Gmail and routine ATS work:** use the persistent Gmail tab for verification links, OTPs, and confirmations, then restore the application tab. Ask the user only for direct password/vault entry or user-only CAPTCHA/security challenges—not for Gmail reading or ordinary form actions.
@@ -58,7 +62,7 @@ parent: skills/SKILL.md
 | Resume MD5 gates (PICK/UPLOAD/POST) | `core/resume_secure.py` |
 | Gmail OTP/confirmation read | `core/gmail_read.py` (browser) · `core/gmail_otp.py` (IMAP) |
 | LinkedIn / Naukri login | `core/login_linkedin.py` · `core/login_naukri.py` |
-| CapSolver captcha | `core/capsolver.py` |
+| CAPTCHA detection / fail-closed stop | `core/captcha_guard.py` |
 | Post-submit proof gate | `core/hard_assert.py` |
 | OCR / DOM verify | `core/see.py` · `core/verify.py` |
 | Health check (6 tests) | `core/test_hub.py` |

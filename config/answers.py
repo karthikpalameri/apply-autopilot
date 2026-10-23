@@ -87,7 +87,6 @@ A = {
     "linkedin_pass": _CFG.get("linkedin_pass", ""),
     "gmail_user": _CFG.get("gmail_user", _CFG.get("email", "")),
     "gmail_app_pw": _CFG.get("gmail_app_pw", ""),
-    "capsolver_key": _CFG.get("capsolver_key", ""),
     "answers_india": _CFG.get("application_answers_india", {}),
 }
 
@@ -101,12 +100,12 @@ def num(key):
     return str(_CFG.get(key, ""))
 
 
-def answer_yes_no(question_key, default="Yes"):
+def answer_yes_no(question_key, default=""):
     """Look up a saved India application answer by its snake_case key."""
     ans = (_CFG.get("application_answers_india", {}) or {}).get(question_key)
     return ans or default
 
 
 if __name__ == "__main__":
-    safe = {k: v for k, v in A.items() if k not in ("linkedin_pass", "gmail_app_pw", "capsolver_key")}
+    safe = {k: v for k, v in A.items() if k not in ("linkedin_pass", "gmail_app_pw")}
     print(json.dumps(safe, indent=2, ensure_ascii=False))

@@ -316,7 +316,6 @@ chmod-600 config file or the logged-in browser session.
 
     profile["linkedin_user"] = ask("LinkedIn login email", cfg.get("email"))
     profile["linkedin_pass"] = ask("LinkedIn password (stored locally only)", "", secret=True)
-    profile["capsolver_key"] = ask("CapSolver API key (optional, for captchas)", "", secret=True)
 
 
 # ---------------------------------------------------------------- 7. environment

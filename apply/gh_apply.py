@@ -19,6 +19,7 @@ import json, os, re, sys, time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.logger import log, timeit
+from core.captcha_guard import page_has_captcha
 from config.answers import A, RESUME
 
 
@@ -183,6 +184,10 @@ def apply(board, jobid, url):
     if int(errs or 0) > 0:
         print("STILL MISSING REQUIRED — manual fix needed")
         sys.exit(2)
+
+    if page_has_captcha(_ev):
+        print("CAPTCHA detected — refusing automated submit. Leaving the headed page open for you.")
+        return False
 
     _ev("() => { const b=[...document.querySelectorAll('button, input[type=submit]')].find(x=>x.offsetParent&&/submit/i.test((x.innerText||x.value||'').trim())); if(b){ b.click(); return 'clicked'; } return 'no'; }")
     time.sleep(8)

@@ -4,7 +4,7 @@
 - `runtime/server.py` was gitignored + never committed — lost the whole ctl :9000 leg. Rebuilt from call-site protocol (ops: status/navigate/eval/snap/keys/htype/hfill/fill/mouse_click/upload_cdp). `.gitignore` now exempts it (`!runtime/server.py`).
 - `.venv` was missing → `python3 -m venv .venv && .venv/bin/pip install cloakbrowser pypdf` (first cloakbrowser launch downloads the binary).
 - Health baseline: `bash run.sh` → 5/6 green (prod_sweep = external greenhouse API, not local).
-- macOS Python SSL: framework python lacks the system CA bundle → external HTTPS (greenhouse/lever/ashby/capsolver/wday) needs certifi. All urllib call sites now pass `context=create_default_context(cafile=certifi.where())`. `certifi` is a venv dep.
+- macOS Python SSL: framework python lacks the system CA bundle → external HTTPS (greenhouse/lever/ashby/wday) needs certifi. All urllib call sites now pass `context=create_default_context(cafile=certifi.where())`. `certifi` is a venv dep.
 - `:3000` viewport: v1.14.1 removed `--viewport` — server default only; resize per page via MCP `browser_resize` when needed.
 ## 2026-08-12
 - browser_run_code_unsafe = full Playwright — the unlock for Workday/GH selects

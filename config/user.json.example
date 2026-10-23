@@ -36,16 +36,5 @@
   "gmail_consent": true,
   "gmail_user": "jane.doe@example.com",
   "gmail_app_pw": "",
-  "capsolver_key": "",
-  "application_answers_india": {
-    "work_authorization_without_sponsorship": "Yes",
-    "temporary_authorization_future_sponsorship": "No",
-    "employment_restrictions": "No",
-    "other_business_or_employment": "No",
-    "previous_cigna_employment": "No",
-    "previous_cigna_contracting": "No",
-    "government_official_relationship": "No",
-    "cigna_employee_relationship": "No",
-    "citizenship_status": "Citizen (India)"
-  }
+  "application_answers_india": {}
 }

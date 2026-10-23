@@ -2,8 +2,8 @@
 """setup.py — one-time interactive wizard (cross-platform: macOS / Linux / Windows).
 
 Walks you through YOUR details step by step and writes everything into
-`config/user.json` (git-ignored, chmod 600 on POSIX) + `config/resume.md5`
-+ `core/.env`. No secrets are ever written to a tracked file.
+`config/user.json` (git-ignored, chmod 600 on POSIX) + `config/resume.md5`.
+No secrets are ever written to a tracked file.
 
 Run:
     python3 setup.py            # interactive
@@ -19,7 +19,6 @@ import sys
 HUB = os.path.dirname(os.path.abspath(__file__))
 CFG_PATH = os.path.join(HUB, "config", "user.json")
 MD5_PATH = os.path.join(HUB, "config", "resume.md5")
-ENV_PATH = os.path.join(HUB, "core", ".env")
 
 IS_WINDOWS = os.name == "nt"
 
@@ -49,6 +48,17 @@ def ask_bool(prompt, default_yes=True):
     if not v:
         return default_yes
     return v in ("y", "yes", "1", "true")
+
+
+def ask_bool_required(prompt):
+    """Ask for a truthful yes/no answer without silently choosing a default."""
+    while True:
+        value = input(prompt + " [y/n]: ").strip().lower()
+        if value in ("y", "yes", "1", "true"):
+            return True
+        if value in ("n", "no", "0", "false"):
+            return False
+        print("  (please answer y or n)")
 
 
 def ask_int(prompt, default):
@@ -154,19 +164,15 @@ chmod-600 config file or the logged-in browser session.
     cfg["linkedin_pass"] = ask("LinkedIn password", "", secret=True)
     cfg["gmail_user"] = ask("Gmail address", cfg["email"])
     cfg["gmail_app_pw"] = ask("Gmail App Password (IMAP — optional)", "", secret=True)
-    cfg["capsolver_key"] = ask("CapSolver API key (optional, for captchas)", "", secret=True)
-
     print("\n--- Application answers (India) ---")
+    print("Answer truthfully; these values stay only in your ignored local config. Employer-specific conflicts and consents are never prefilled.")
     cfg["application_answers_india"] = {
-        "work_authorization_without_sponsorship": "Yes" if ask_bool("Legally authorized to work without sponsorship?") else "No",
-        "temporary_authorization_future_sponsorship": "No",
-        "employment_restrictions": "No",
-        "other_business_or_employment": "No",
-        "previous_cigna_employment": "No",
-        "previous_cigna_contracting": "No",
-        "government_official_relationship": "No",
-        "cigna_employee_relationship": "No",
-        "citizenship_status": ask("Citizenship status", "Citizen (India)"),
+        "work_authorization_without_sponsorship": "Yes" if ask_bool_required("Legally authorized to work without sponsorship?") else "No",
+        "temporary_authorization_future_sponsorship": "Yes" if ask_bool_required("Will you require sponsorship now or in the future?") else "No",
+        "employment_restrictions": "Yes" if ask_bool_required("Are you subject to employment restrictions or a non-compete?") else "No",
+        "other_business_or_employment": "Yes" if ask_bool_required("Do you have other business or employment to disclose?") else "No",
+        "government_official_relationship": "Yes" if ask_bool_required("Do you have a government-official relationship to disclose?") else "No",
+        "citizenship_status": ask("Citizenship status", required=True),
     }
 
     # ---- persist ----
@@ -176,14 +182,11 @@ chmod-600 config file or the logged-in browser session.
     chmod600(CFG_PATH)
 
     write_resume_md5(cfg)
-    write_env(cfg)
 
     print("\n" + "=" * 64)
     print("✅ Saved to config/user.json (chmod 600)")
     if cfg["resume_filename"]:
         print(f"✅ Resume will be uploaded as: {cfg['resume_filename']}")
-    if cfg["capsolver_key"]:
-        print("✅ CapSolver key written to core/.env")
     print("\nNext steps:")
     print("  1. python3 hub.py install   # create venv + install all dependencies")
     print("  2. python3 hub.py start     # start the browser stack")
@@ -206,13 +209,6 @@ def write_resume_md5(cfg):
         print("⚠️  Resume not found — config/resume.md5 not written (fix resume_path, re-run setup).")
 
 
-def write_env(cfg):
-    if cfg.get("capsolver_key"):
-        os.makedirs(os.path.dirname(ENV_PATH), exist_ok=True)
-        with open(ENV_PATH, "w", encoding="utf-8") as f:
-            f.write(f"CAPSOLVER_API_KEY={cfg['capsolver_key']}\n")
-        chmod600(ENV_PATH)
-
 
 def cmd_check():
     """Print a redacted view of the current config (no secrets)."""
@@ -221,7 +217,7 @@ def cmd_check():
         sys.exit(1)
     cfg = json.load(open(CFG_PATH, encoding="utf-8"))
     redacted = dict(cfg)
-    for k in ("linkedin_pass", "gmail_app_pw", "capsolver_key"):
+    for k in ("linkedin_pass", "gmail_app_pw"):
         redacted[k] = "***" if redacted.get(k) else "(empty)"
     print(json.dumps(redacted, indent=2, ensure_ascii=False))
     print("resume exists:", os.path.exists(os.path.expanduser(cfg.get("resume_path", ""))))

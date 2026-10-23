@@ -50,4 +50,4 @@ job-application automation repo that ships with **zero personal data**.
 - No secrets, passwords, recruiter emails, CTC figures, addresses, or employer names
   are present anywhere in the repository.
 
-[0.0.1]: https://github.com/karthikpalameri/apply-autopilot/releases/tag/v0.0.1
+[0.0.1]: https://github.com/OWNER/apply-autopilot/releases/tag/v0.0.1

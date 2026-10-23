@@ -96,7 +96,7 @@ If any item is incomplete, stop browser actions and finish preflight first.
 
 ## EDGES (DRY — nodes point, never duplicate)
 - FIND → VERIFY: always live-API check before applying (search indexes STALE fast)
-- APPLY → VERIFY: captcha? → user solves (visible browser) → submit → proof
+- APPLY → VERIFY: CAPTCHA? → stop, leave page open, hand off; never solve/bypass or automated-submit after detection
 - TRACK → FIND: run find/tracker_reconcile.py before each FIND session (fresh APPLIED.md → dedupe)
 - VERIFY → EMAIL: no ATS? recruiter channel
 - LEARN → APPLY: read LESSONS/LESSONS-apply.md before every apply session

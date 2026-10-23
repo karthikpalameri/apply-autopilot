@@ -1,11 +1,11 @@
 import os
 #!/usr/bin/env python3
-"""ashby_apply.py <url> — Ashby form + CapSolver reCAPTCHA v3 token injection."""
+"""ashby_apply.py <url> — archived Ashby form example; CAPTCHA is a hard stop."""
 import json, re, socket, sys, time, random, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.answers import A, RESUME
 from core.resume_secure import BEFORE_UPLOAD, POST as RESUME_POST, PICK as RESUME_PICK
-from capsolver import solve_recaptcha_v3
+from core.captcha_guard import page_has_captcha
 
 def ctl(cmd, timeout=150):
     s = socket.create_connection(("127.0.0.1", 9000), timeout=timeout)
@@ -68,19 +68,10 @@ def main():
     print(f"📎 resume: {'uploaded' if r.get('ok') else r.get('error')} | filled {filled}", flush=True)
     if r.get('ok'): RESUME_POST()
 
-    # --- CapSolver reCAPTCHA v3 ---
-    r = ctl({"op": "eval", "js": "() => { const f = [...document.querySelectorAll('iframe')].find(x => x.src.includes('recaptcha')); const m = f ? f.src.match(/[?&]k=([^&]+)/) : null; const ta = document.querySelector('textarea[name=g-recaptcha-response]'); return JSON.stringify({sitekey: m ? m[1] : null, hasTextarea: !!ta}); }"})
-    info = json.loads(r.get("result"))
-    print("recaptcha:", info, flush=True)
-    if info.get("sitekey"):
-        tok, err = solve_recaptcha_v3(info["sitekey"], url, score=0.9)
-        if tok:
-            print(f"✅ token ({len(tok)} chars) — injecting", flush=True)
-            ctl({"op": "eval", "js": f"() => {{ const ta = document.querySelector('textarea[name=g-recaptcha-response]'); if (!ta) return 'no-ta'; const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; setter.call(ta, '{tok}'); ta.dispatchEvent(new Event('input', {{bubbles:true}})); ta.dispatchEvent(new Event('change', {{bubbles:true}})); return 'injected'; }}"})
-            time.sleep(2)
-        else:
-            print(f"❌ capsolver: {err}", flush=True)
-    # submit
+    # CAPTCHA hard stop — never solve or submit when a challenge is present.
+    if page_has_captcha(lambda js: (ctl({"op": "eval", "js": js}) or {}).get("result")):
+        print("STOP: CAPTCHA detected; no submit was clicked. Page left open for you.", flush=True)
+        return
     r = ctl({"op": "eval", "js": "() => { const b = [...document.querySelectorAll('button')].find(x => /submit application/i.test((x.innerText||'').trim())); if (!b) return 'no-btn'; b.scrollIntoView({block:'center'}); b.click(); return 'clicked'; }"})
     print("submit:", r.get("result"), flush=True)
     time.sleep(10)

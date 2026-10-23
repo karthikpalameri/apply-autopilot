@@ -84,7 +84,7 @@ See `skills/resume/SKILL.md`.
 ## Architecture (SOC)
 
 ```
-core/    ctl.py (CDP :9000) · browser.py (:3000 MCP) · capsolver.py · see.py (OCR)
+core/    ctl.py (CDP :9000) · browser.py (:3000 MCP) · captcha_guard.py · see.py (OCR)
 core/    resume_secure.py (resume + MD5 gates) · gmail_read.py · verify.py
 core/    freehire_client.py (freehire API transport — SRP)
 apply/   li_drive · ih_sweep · fill_gh_fast · gh_apply (generic Greenhouse) · li_listed_apply
@@ -173,9 +173,10 @@ verifiably, and without leaking your data. All credit goes to the projects below
 - **requests** — HTTP for ATS APIs — https://requests.readthedocs.io
 - **certifi** — TLS certificate bundle — https://github.com/certifi/python-certifi
 
-### 🧩 CAPTCHA solving (optional)
-- **CapSolver** (service) — https://www.capsolver.com
-- **capsolver** (PyPI client) — https://pypi.org/project/capsolver/
+### 🛑 CAPTCHA safety
+CAPTCHA pages are a hard stop. Automation never solves or bypasses a challenge and never
+clicks or triggers submit after detecting one; the headed page is left open for the user.
+There is no external CAPTCHA-solving API key or service integration.
 
 ### 📨 Email / OTP (stdlib, no third party)
 - **Python** `imaplib` / `smtplib` / `email` — https://www.python.org

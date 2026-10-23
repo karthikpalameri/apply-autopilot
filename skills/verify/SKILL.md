@@ -24,7 +24,7 @@ parent: skills/SKILL.md
 3. HTML dumps + DOM rects for click targets
 
 ## CAPTCHA RULE
-- Complete and verify all non-CAPTCHA required fields first (target ~99% of the application), then stop at reCAPTCHA/hCaptcha/image-puzzle and ask the user to solve it in the visible browser. Never bypass or solve it. Resume only after the user completes it; never report past an unsolved CAPTCHA.
+- Complete and verify all other safe required fields first (target ~99%). At any CAPTCHA/reCAPTCHA/hCaptcha/image-puzzle or human-verification marker, stop and leave the headed page open for the user. Never solve/bypass it and never click or trigger submit after detection. Do not resume automated submission even if the user later resolves it; never report an unsolved challenge as submitted.
 
 ## ERROR-DRIVEN SUBMIT (read the error, fix, retry)
 - Submit → READ the error (DOM `[class*=error]`/`[aria-invalid=true]` + OCR) → fix the EXACT field → re-submit. Errors appear ONE at a time (GH/LinkedIn) — loop until the positive message or record in-progress.

@@ -81,5 +81,5 @@ These are installed automatically by `python3 hub.py install` and verified by
 
 ## Secrets inventory (NEVER commit)
 
-`config/user.json` (git-ignored, chmod 600) · `core/.env` (CapSolver key) ·
-`config/resume.md5` · LinkedIn/Gmail credentials (in `config/user.json` and browser sessions only).
+`config/user.json` (git-ignored, chmod 600) · `config/resume.md5` ·
+LinkedIn/Gmail credentials (in `config/user.json` and browser sessions only). No CAPTCHA API key is used.

@@ -1,7 +1,7 @@
 # 🔧 INSTALL — complete onboarding (macOS / Linux / Windows)
 
 Everything a NEW user needs: deps, pi settings, MCP servers, local SearXNG,
-CapSolver, first run, verification. ~10–15 min.
+CAPTCHA safety, first run, verification. ~10–15 min.
 
 > **TL;DR:** `python3 hub.py setup && python3 hub.py install && python3 hub.py start`
 > (Windows: use `python` and the `.bat` files).
@@ -16,7 +16,7 @@ Three browser channels — one owner each (never duplicate):
   Python batch  ── HTTP :3000 ──> cloakbrowser-mcp (npm)                        [hub.py start owns]
   Python fast   ── TCP :9000 ──> runtime/server.py ──> Chrome (CDP)             [hub.py start owns]
 
-memory/context: context-mode (pi pkg)   search: local SearXNG (docker :8080)   captcha: CapSolver
+memory/context: context-mode (pi pkg)   search: local SearXNG (docker :8080)   CAPTCHA: user handoff only
 ```
 
 Pi's MCP lives in `~/.pi/agent/mcp-adapter.json`; `:3000` is Python-only and must never be declared to Pi.
@@ -123,10 +123,11 @@ curl -s "http://127.0.0.1:8080/search?q=test&format=json" -H "Accept: applicatio
 
 ---
 
-## 7. CapSolver (reCAPTCHA/hCaptcha) — optional
+## 7. CAPTCHA handling
 
-Get a key at <https://dashboard.capsolver.com> and enter it in `setup.py`
-(or put `CAPSOLVER_API_KEY=` in `core/.env`).
+CAPTCHA pages are not solved or bypassed. The automation stops before submit and leaves
+the visible page open for the user; no automated submission occurs after a challenge is detected.
+No CAPTCHA-solving service or API key is required.
 
 ---
 
