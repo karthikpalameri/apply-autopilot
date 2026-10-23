@@ -119,6 +119,18 @@ def check_invariants():
     if not any(x.startswith("missing entry point") for x in FAILS):
         note_ok("all key entry points present")
 
+    # freehire submodules must be initialized (git clone --recurse-submodules)
+    for sm in ("third_party/freehire", "third_party/freehire-cli"):
+        marker = os.path.join(HUB, sm, ".git")
+        has_files = os.path.isdir(marker) or os.path.isfile(marker)
+        if not has_files:
+            note_fail(
+                f"{sm} submodule not initialized — run:"
+                f"  git submodule update --init --recursive"
+            )
+    if not any("submodule not initialized" in x for x in FAILS):
+        note_ok("freehire submodules initialized")
+
 
 def main():
     print("=" * 68)
