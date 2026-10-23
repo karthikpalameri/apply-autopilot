@@ -22,6 +22,16 @@
 | git | clone/share | `git --version` |
 | pi (optional) | coding agent | `pi --version` |
 
+## Upstream repos (freehire — pinned as git submodules)
+
+| Repo | URL | Why | Type |
+|---|---|---|---|
+| `strelov1/freehire` | https://github.com/strelov1/freehire.git | open-source job catalogue; keyless API at https://freehire.me/api/v1 | **submodule** `third_party/freehire` |
+| `strelov1/freehire-cli` | https://github.com/strelov1/freehire-cli.git | Go CLI over the same API (auth cmds: ghost/market-fit) | **submodule** `third_party/freehire-cli` |
+
+Init on a fresh clone: `git clone --recurse-submodules …` (or `git submodule update --init --recursive`).
+Update upstream: `git submodule update --remote`. Full guide: `docs/FREEHIRE.md`.
+
 ## MCP servers (one owner per channel — never duplicate)
 
 | Server | Transport | Owner | Consumer | Why |
@@ -64,6 +74,10 @@ These are installed automatically by `python3 hub.py install` and verified by
 | `skills/README.md` | skill index |
 | `core/test_hub.py` | health check (6 tests) |
 | `core/mcp_test.py` | MCP live probe |
+| `find/freehire_sweep.py` | freehire discovery (additive source) |
+| `core/freehire_client.py` | freehire HTTP transport (SRP) |
+| `config/freehire.py` | freehire filters/gates/routing (DRY data) |
+| `docs/FREEHIRE.md` | freehire integration guide |
 
 ## Secrets inventory (NEVER commit)
 

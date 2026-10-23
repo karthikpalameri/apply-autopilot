@@ -39,7 +39,7 @@ Install these once, per OS:
 ## 2. Get the code + personalize
 
 ```bash
-git clone <your-fork> apply-autopilot
+git clone --recurse-submodules <your-fork> apply-autopilot
 cd apply-autopilot
 
 python3 hub.py onboard    # GUIDED: explains the tool → grills your skills → Gmail consent → profile
@@ -152,6 +152,7 @@ python3 hub.py doctor                                   # environment diagnosis
 .venv/bin/python core/wday_probe.py                     # Workday up/down
 curl -s "http://127.0.0.1:8080/search?q=test&format=json" | head -c 80   # searxng
 .venv/bin/python find/prod_sweep.py                     # sample sweep works
+.venv/bin/python find/freehire_sweep.py                  # freehire sweep works (keyless)
 ```
 
 ---

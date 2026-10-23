@@ -16,8 +16,8 @@ def _setup(name="hub", level=logging.INFO):
     if lg.handlers:
         return lg
     lg.setLevel(level)
-    # console
-    c = logging.StreamHandler(sys.stdout)
+    # console -> stderr (stdout stays clean for program data / --json output)
+    c = logging.StreamHandler(sys.stderr)
     c.setFormatter(logging.Formatter(_FMT, datefmt="%H:%M:%S"))
     # file (rotating, 1MB x 3)
     f = RotatingFileHandler(os.path.join(LOGS, "app.log"), maxBytes=1_000_000, backupCount=3)

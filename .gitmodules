@@ -1,0 +1,6 @@
+[submodule "third_party/freehire"]
+	path = third_party/freehire
+	url = https://github.com/strelov1/freehire.git
+[submodule "third_party/freehire-cli"]
+	path = third_party/freehire-cli
+	url = https://github.com/strelov1/freehire-cli.git

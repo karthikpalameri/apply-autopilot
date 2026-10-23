@@ -86,9 +86,10 @@ See `skills/resume/SKILL.md`.
 ```
 core/    ctl.py (CDP :9000) · browser.py (:3000 MCP) · capsolver.py · see.py (OCR)
 core/    resume_secure.py (resume + MD5 gates) · gmail_read.py · verify.py
-apply/   li_drive · ih_sweep · fill_gh_fast · li_listed_apply
-find/    prod_sweep (ATS APIs) · product_companies_builder/lookup · tracker_reconcile · sweep
-config/  answers.py (single source of truth) · user.json.example · data/product_seed.py
+core/    freehire_client.py (freehire API transport — SRP)
+apply/   li_drive · ih_sweep · fill_gh_fast · gh_apply (generic Greenhouse) · li_listed_apply
+find/    prod_sweep (ATS APIs) · freehire_sweep (freehire API) · product_companies_builder/lookup · tracker_reconcile · sweep
+config/  answers.py (single source of truth) · freehire.py (freehire filters/gates/routing) · user.json.example
 skills/  apply · find · verify · email · resume · track · learn · ops (+ ATS recipes)
 hub.py   cross-platform CLI (setup/install/start/stop/health/track/doctor)
 setup.py · runtime/server.py · README.md · product_companies.md
@@ -109,6 +110,18 @@ Change your phone/CTC/resume once, everything updates.
 
 `config/progress.json` — total apps, per-company, per-channel, blocked reasons.
 Run `python3 hub.py track` for the applied vs not-applied report.
+
+## freehire (additive discovery source)
+
+An extra, keyless job-catalogue source over the public freehire API — finds QA/SDET
+(and any role) on ATS boards our own scans miss (SuccessFactors, ZohoRecruit, Oracle,
+Jibe, Eightfold, Comeet, ADP). See `docs/FREEHIRE.md`.
+
+```bash
+.venv/bin/python find/freehire_sweep.py           # your location QA/SDET, strict gate
+.venv/bin/python find/freehire_sweep.py india     # India-wide
+.venv/bin/python apply/gh_apply.py <greenhouse-url>   # generic Greenhouse apply (dry-run default)
+```
 
 ## Privacy & sharing
 
@@ -185,6 +198,8 @@ We don't own these — we only talk to their public job boards / APIs.
 - **Jobvite** — https://www.jobvite.com · **Rippling** — https://www.rippling.com
 - **Oracle HCM (Fusion)** — https://www.oracle.com/human-capital-management/ · **Select2** — https://select2.org
 - Job sources: **LinkedIn** — https://www.linkedin.com · **Naukri** — https://www.naukri.com · **InstaHyre** — https://www.instahyre.com
+- **freehire** — open-source job catalogue + keyless API — https://github.com/strelov1/freehire · https://freehire.me
+- **freehire-cli** — CLI/MCP over the freehire API — https://github.com/strelov1/freehire-cli
 
 ### 📚 Conventions, docs & tooling we lean on
 - **Keep a Changelog** — https://keepachangelog.com
