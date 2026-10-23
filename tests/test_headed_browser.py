@@ -28,7 +28,8 @@ class TestHeadedBrowser(unittest.TestCase):
 
     def test_no_headless_anywhere(self):
         for root, dirs, files in os.walk(ROOT):
-            dirs[:] = [d for d in dirs if d not in (".git", ".venv", "__pycache__", "node_modules", "tests")]
+            # third_party/ = upstream submodules (freehire) — not our code, not linted
+            dirs[:] = [d for d in dirs if d not in (".git", ".venv", "__pycache__", "node_modules", "tests", "third_party")]
             for f in files:
                 if f.endswith((".py", ".md", ".json", ".sh", ".yml", ".yaml")):
                     p = os.path.join(root, f)
