@@ -5,7 +5,7 @@ import sys, os, json, time, re, tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.browser import McpBrowser
 from config.answers import A
-from core.captcha_guard import text_has_captcha
+from core.captcha_guard import page_has_captcha
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APPLIED = os.path.join(ROOT, "scratch", "APPLIED.md")
@@ -55,6 +55,7 @@ def record_attempt(company, title, url, status="submitted-awaiting-email", proof
 b = McpBrowser()
 b._rpc("initialize", {"protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {"name":"li-apply","version":"0.1"}})
 def snap(): return b.snapshot().get("text","")
+def _probe(js): return (b.eval_js(js) or {}).get("result", "")
 def ref_of(t, pattern):
     m = re.search(rf'({pattern})[^\[]*\[ref=(\w+)\]', t)
     return m.group(2) if m else None
@@ -116,15 +117,12 @@ def apply(job_ref, url):
     # next/submit walking
     for step in range(8):
         t = snap()
-        if text_has_captcha(t):
+        if page_has_captcha(_probe, t):
             print("    🛑 CAPTCHA/security check: no submit was clicked; page left open for you")
             return False
         sub = ref_of(t, r'button "Submit application"')
         nxt = ref_of(t, r'button "Next"')
         if sub:
-            if text_has_captcha(t):
-                print("    🛑 CAPTCHA/security check: no submit was clicked; page left open for you")
-                return False
             b._call("browser_click", {"target": sub}); time.sleep(3)
             t2 = snap()
             ack = bool(re.search(r"application (was )?sent|application submitted|keep track of your application", t2, re.I))

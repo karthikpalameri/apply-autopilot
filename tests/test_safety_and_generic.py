@@ -51,7 +51,7 @@ class TestCaptchaGuard(unittest.TestCase):
             "apply/fill_gh_fast.py": "page_has_captcha",
             "apply/ih_sweep.py": "page_has_captcha",
             "apply/li_drive.py": "page_has_captcha",
-            "apply/li_listed_apply.py": "text_has_captcha",
+            "apply/li_listed_apply.py": "page_has_captcha",
         }
         for rel, guard in expected.items():
             with open(os.path.join(ROOT, rel), encoding="utf-8") as f:
@@ -62,10 +62,11 @@ class TestCaptchaGuard(unittest.TestCase):
             "CHANGELOG.md", "config/user.json.example", "config/answers.py", "setup.py",
             "skills/REFERENCE.md", "skills/apply/SKILL.md", "README.md", "AGENTS.md",
         ]
-        content = "\n".join(
-            open(os.path.join(ROOT, rel), encoding="utf-8").read().lower()
-            for rel in files
-        )
+        chunks = []
+        for rel in files:
+            with open(os.path.join(ROOT, rel), encoding="utf-8") as f:
+                chunks.append(f.read().lower())
+        content = "\n".join(chunks)
         for marker in ("cigna", "karthikpalameri", "capsolver_api_key"):
             self.assertNotIn(marker, content)
 
