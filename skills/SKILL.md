@@ -64,12 +64,15 @@ platforms: [macos, linux, win32]
 - If sources conflict or identity/status is uncertain, do not apply; reconcile first. Some employers are repeat-application prone: verify the tracker and Gmail history and never reapply to a role already attempted.
 - Keep both trackers authoritative and current: record every attempt/blocker and update status/proof after submissions and Gmail verification; never overwrite historical facts.
 
+## DISCOVERY SOURCE GATE — FAIL CLOSED
+At the start of every new job-search batch, run the mandatory keyless Freehire public-catalogue first pass defined in `skills/find/SKILL.md` before web (SearXNG), LinkedIn, Naukri, or ATS discovery. Use `--strict --json` for product-only requests and `--json` when the user also permits genuine GCC/in-house roles. If the scan errors or returns no candidates, record that explicitly before using supplemental sources. Freehire discovery does not replace official-ATS verification or duplicate checks.
+
 ## TWO-TAB SESSION (NON-NEGOTIABLE)
 → **`skills/REFERENCE.md#two-tab-session`** (single source). One FORM tab + one persistent GMAIL tab; never restart the browser/MCP while FORM holds data. Browser topology (one owner per channel): **`skills/REFERENCE.md#browser-topology`**.
 
 ## SESSION START GATE — FAIL CLOSED
 Before any browser navigation, click, or form action:
-1. Read `config/progress.json` and `scratch/APPLIED.md`, inspect LinkedIn Applied/Job Tracker, and search Gmail for prior application evidence; cache the next three exact role/company/LinkedIn-ID/ATS-ID/domain tuples.
+1. Complete the mandatory Freehire first pass above, then read `config/progress.json` and `scratch/APPLIED.md`, inspect LinkedIn Applied/Job Tracker, and search Gmail for prior application evidence; cache the next three exact role/company/LinkedIn-ID/ATS-ID/domain tuples.
 2. List tabs and ensure one FORM tab plus one persistent GMAIL tab; never begin with only a blank FORM tab.
 3. Classify all three as `DUPLICATE`, `MISMATCH`, `READY`, or `BLOCKED`; do not open an ATS for the first two. Apply only to verified high-revenue product companies or genuine GCCs.
 4. Use one compact DOM extraction for candidate metadata; do not start with a huge full-page snapshot.

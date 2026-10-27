@@ -12,7 +12,13 @@ parent: skills/SKILL.md
 - Cache results for the current session; never rescan the same LinkedIn pages or reopen a completed/blocked URL unless it is stale, changed, or explicitly requested. Each navigation/click still requires target pre-check and URL/content post-check.
 - Prefer direct live ATS/API routes once the employer URL is known; LinkedIn detail-page revisits are discovery waste.
 
-## SOURCES (live-first)
+## MANDATORY FREEHIRE FIRST PASS
+- **Freehire preflight is mandatory after every fresh clone and before every new search:** this repository uses Freehire's keyless public catalogue API through `core/freehire_client.py`; no `freehire` CLI, login, or candidate profile is required for discovery.
+- Run `.venv/bin/python find/freehire_sweep.py --strict --json` once before each new product-company search. If the request also permits genuine GCC/in-house employers, use `.venv/bin/python find/freehire_sweep.py --json` instead. Use the `india` argument only when the user permits India-wide roles.
+- Treat output as discovery leads only: independently verify the exact role on the official employer ATS and run the complete employer, fit, and duplicate gates. A Freehire `pass` is not application authorization.
+- If the sweep errors or returns no candidates, record that result and then continue with other sources. Never silently skip or repeat an unchanged scan in the same session.
+
+## SOURCES (supplemental, live-first)
 1. **ATS APIs** (concurrent, 3s timeouts): `find/prod_sweep.py` + `find/listed_sweep.py`
    - GH: `boards-api.greenhouse.io/v1/boards/{board}/jobs`
    - Lever: `api.lever.co/v0/postings/{co}?mode=json`
@@ -35,7 +41,7 @@ parent: skills/SKILL.md
 
 ## GUARDS
 - **Strict employer gate:** apply only to (a) a product company with credible, verifiable evidence of substantial revenue/scale, or (b) a genuine Global Capability Center (GCC) of an established company. Verify the company and role; do not infer revenue or GCC status from branding. If evidence is unclear, skip it. Staffing, recruiting, consulting, outsourcing, and service vendors do not qualify unless the role is demonstrably within a genuine GCC.
-- The user's next batch is **three eligible LinkedIn jobs**. Source these from LinkedIn Jobs; if fewer than three pass the employer, role-fit, availability, and duplicate gates, report the shortfall rather than lowering the bar.
+- **Batch source follows the user request.** For product-company searches, use the mandatory Freehire first pass above; do not force LinkedIn when the user asks for roles across distinct company/ATS portals. Use LinkedIn when requested or as a supplemental source. If fewer than three pass the employer, role-fit, availability, and duplicate gates, report the shortfall rather than lowering the bar.
 - Location: Bangalore/India only (skip Hyderabad/Pune unless remote ok).
 - Closed/410 listings and duplicate applications are non-actionable. CAPTCHA/authentication blockers stop automation; finish other safe fields if possible, then leave the headed page open. Never solve/bypass CAPTCHA or click/trigger submit after detecting it.
 
