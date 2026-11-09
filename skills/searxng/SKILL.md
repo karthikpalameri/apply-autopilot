@@ -1,6 +1,6 @@
 ---
 name: searxng
-description: WEB SEARCH node — private local SearXNG (https://github.com/searxng/searxng).
+description: WEB SEARCH node — private local SearXNG (<https://github.com/searxng/searxng>).
   Use it whenever you need web research: find portal-only job roles, verify a company/ATS,
   or look up anything. Trigger: "search", "web search", "find role via web", "searxng".
 parent: skills/ops/SKILL.md
@@ -9,7 +9,7 @@ parent: skills/ops/SKILL.md
 # SEARXNG — private local web search (no API key, free, JSON API)
 
 > **If you need searching, use this.** We have a local SearXNG instance at
-> `http://127.0.0.1:8080` — project: **https://github.com/searxng/searxng**
+> `<http://127.0.0.1:8080`> — project: **<https://github.com/searxng/searxng**>
 
 ## WHAT it is
 SearXNG is a self-hosted **metasearch engine**: it queries many search engines
@@ -41,14 +41,14 @@ It runs two containers: `searxng-core` (search, :8080) + `searxng-valkey` (cache
 curl -s 'http://127.0.0.1:8080/search?q=Bengaluru+SDET+Lever+jobs&format=json' -H 'Accept: application/json'
 
 # Human web UI:
-open http://127.0.0.1:8080
+open <http://127.0.0.1:8080>
 ```
 JSON response: `{"results": [{"title": ..., "url": ..., "content": ...}, ...]}`.
 
 ## Agent integration (pi)
 - `~/.pi/web-search.json` → `{ "provider": "all", "searxngBaseUrl": "http://127.0.0.1:8080" }`
   (written by `python3 hub.py install` / `hub.py mcp-config`). Restart pi after writing.
-- In any skill, say **"if you need searching use SearXNG at http://127.0.0.1:8080"**.
+- In any skill, say **"if you need searching use SearXNG at <http://127.0.0.1:8080"**.>
 
 ## Troubleshooting
 ```bash
@@ -64,7 +64,7 @@ python3 infra/searxng/setup.py    # re-run to verify / fix config
 - Not exposed to the internet — bound to `127.0.0.1` only (private).
 
 ## LESSONS
-- skills/LESSONS/LESSONS-ops.md (Docker/SearXNG section)
+- skills/LESSONS.md (Docker/SearXNG section)
 
 ---
 
@@ -72,5 +72,5 @@ python3 infra/searxng/setup.py    # re-run to verify / fix config
 - **Master:** `skills/SKILL.md` · **Reference:** `skills/REFERENCE.md` · **Reliability:** `skills/RELIABILITY.md`
 - **Nodes:** `apply` · `email` · `find` · `learn` · `ops` · `resume` · `track` · `verify` · `searxng` (each `skills/<node>/SKILL.md`)
 - **Recipes:** `skills/recipes/` — workday · greenhouse · lever · icims · linkedin · phenom · breezy · jobvite · oraclehcm · email-template-humble
-- **Lessons:** `skills/LESSONS/LESSONS-*.md` — apply · find · verify · email · ops · naukri-profile
+- **Lessons:** `skills/LESSONS.md` — single file, newest section first
 - **Index:** `skills/README.md` · **Repo entry for agents:** `AGENTS.md`

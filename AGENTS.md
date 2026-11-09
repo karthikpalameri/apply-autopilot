@@ -1,165 +1,128 @@
-# 🤖 AGENTS.md — how to work in this repository
+# AGENTS.md — read this first
 
-This file is the entry point for **any** coding agent, AI model, or human.
-Read it first, then follow the pointers. It is intentionally short — details live
-in the referenced files (DRY).
+You are working in **apply-autopilot**. This file is the entry point; it does not
+repeat the rules, it tells you where the one copy of each lives.
 
----
+## One rule above all others: NO SECRETS IN THIS REPO
 
-## 1. What this repository does
+Every personal value lives in **git-ignored local files**, created by the user
+(`python3 hub.py onboard` / `setup`):
 
-**Apply Autopilot** automates the repetitive parts of a job hunt for one candidate
-(the user):
-
-```
-FIND openings → VERIFY they match → APPLY with the user's tailored resume
-             → VERIFY submission proof → EMAIL recruiters → TRACK everything
-```
-
-- **Why:** job applications are 80% repetitive form-filling; the user's energy should
-  go into choosing roles and talking to recruiters, not re-typing their address.
-- **How:** browser automation (CloakBrowser / Playwright) drives ATS forms
-  (Greenhouse, Lever, Workday, LinkedIn Easy Apply, Phenom, iCIMS, …), reads Gmail
-  for OTPs + confirmations, and enforces a proof gate before anything is counted as
-  "applied".
-
----
-
-## 2. One rule above all others: NO SECRETS IN THIS REPO
-
-Every personal value lives in **git-ignored local files**, created by the user:
-
-| File | Contents | Created by |
-|---|---|---|
-| `config/user.json` | identity, CTC, resume path, credentials | `python3 hub.py onboard` / `setup` |
-| `config/profile.json` | grilled skills, achievements, interview answers | `onboard` |
-| `config/resume.md5` | resume integrity hash | `onboard` / `setup` |
+| File | Contents |
+|---|---|
+| `config/user.json` | identity, CTC, resume path, credentials |
+| `config/profile.json` | grilled skills, achievements, interview answers |
+| `config/resume.md5` | resume integrity hash |
 
 These are **never committed**. The tracked template is `config/user.json.example`.
-Scripts read personal data through `config/answers.py` (`A` dict) — never hardcode a
-name/email/phone/salary/resume path in code or skills.
+Scripts read personal data through `config/answers.py` (`A` dict) — never hardcode
+a name/email/phone/salary/resume path in code or skills.
 
----
+## Before you write code
 
-## 3. Commands (cross-platform)
+Read these two, once per session:
 
-All entry points are in `hub.py` — use `python3 hub.py <command>` (Windows: `python`).
+1. `skills/REFERENCE.md` — constants, identity, auth, browser discipline, quality gates
+2. `skills/RELIABILITY.md` — the transaction contract (pre-check → action → post-check)
+
+Do not read the whole `skills/` tree per task. Each rule has exactly one owner
+file; follow the pointer, never copy the text.
+
+## Commands (cross-platform, via `hub.py`)
 
 | Command | Purpose |
 |---|---|
-| `onboard` | **first-run guided experience** — reads your resume first, then confirms every field |
-| `setup` | quick identity/resume/credentials wizard only |
-| `install` | **interactive installer** — detects OS + brew/apt/winget, SHOWS missing deps + commands, installs them on consent; then venv + npm MCP + pi packages + pi config |
-| `start` / `stop` / `restart` | start/stop the browser stack (`runtime/server.py` :9000 + `cloakbrowser-mcp` :3000) |
+| `onboard` | first-run guided experience (resume → confirm → grill → Gmail consent) |
+| `setup` | quick identity/resume/credentials wizard |
+| `install` | interactive installer (OS detect → venv → npm MCP → pi packages) |
+| `start` / `stop` / `restart` | browser stack (`runtime/server.py` :9000 + `cloakbrowser-mcp` :3000) |
 | `health` | 6-test health check (`core/test_hub.py`) |
 | `track` | applied-vs-not-applied report |
 | `doctor` | environment diagnosis |
-| `eval` | **readiness evaluation** — runs test cases and prints a weighted % success rate + fixes |
-| `test` | run the full test suite in `tests/` (skills, code, logic, mcp, searxng, parsing) |
+| `eval` | readiness evaluation (% success rate + fixes) |
+| `test` | full test suite in `tests/` |
 | `mcp-config` | regenerate `~/.pi/agent/mcp-adapter.json` + `web-search.json` |
 
 POSIX wrappers: `run.sh`, `run_li.sh`, `track.sh`. Windows: `run.bat`, `run_li.bat`,
 `track.bat`, `setup.bat`, `install.bat`.
 
----
+## Before you commit — MANDATORY
 
-## 4. Repository map (for navigation)
-
-```
-README.md           ← human overview
-AGENTS.md           ← this file (agent navigation)
-PRIVACY.md          ← what was stripped + how to stay clean
-docs/INSTALL.md     ← full onboarding + troubleshooting (cross-platform)
-docs/DEPENDENCIES.md← complete dependency manifest
-lean-mode.md        ← token/cost runbook (read once per session)
-
-hub.py              ← cross-platform CLI (single entry point)
-installer.py        ← interactive cross-platform installer (brew/apt/winget)
-eval.py             ← readiness evaluation: test cases → % success rate
-setup.py            ← identity/credentials wizard (also imported by onboarding.py)
-onboarding.py       ← resume-first guided setup: read resume → review/confirm → fill gaps →
-                       skills → interview → Gmail consent → env check → generate profile
-resume_parser.py    ← heuristic resume PDF reader (email/phone/links/skills/years/education)
-
-core/               ← browser control, resume gates, gmail read, OCR, CAPTCHA guard, verify
-apply/              ← apply drivers (li_drive, ih_sweep, fill_gh_fast, li_listed_apply)
-find/               ← job discovery (prod_sweep, sweep, product_companies_builder, tracker_reconcile)
-config/             ← answers.py (A dict), user.json.example, data/ (company seed), pi config templates
-runtime/server.py   ← ctl bridge :9000 (the ONLY tracked file under runtime/)
-infra/searxng/      ← local private web search: setup.py (auto-setup) + docker-compose + README
-archive/scripts/    ← one-off per-company apply scripts (legacy reference; read its README)
-tests/              ← organized test suite (run: python3 hub.py test) — skills/code/logic/mcp/searxng/parsing/headed
-skills/             ← the skill graph (see below)
-product_companies.md← 500-company product list (websites + LinkedIn)
+```bash
+scripts/check.sh
 ```
 
----
+Exit 1 blocks the commit. Ten gates: ruff, ty, vulture, jscpd (duplication +
+single-owner boundaries), pip-audit, upload guard, identity guard, page-guard,
+shellcheck, markdownlint, layering.
 
-## 5. The skills graph — how to pick up skills
+Install the hook once per clone so this cannot be forgotten:
 
-`skills/` is organized as a **directed graph**. Read in this order:
+```bash
+scripts/check.sh --install
+```
 
-1. **`skills/SKILL.md`** — the MASTER. Routes the job-hunt graph
-   (RESUME → FIND → APPLY → VERIFY → EMAIL → LEARN → TRACK) + dedupe gate.
-2. **`skills/RELIABILITY.md`** — transaction contract (pre-check → action → post-check).
-3. **`skills/REFERENCE.md`** — single source of truth (identity, auth priority,
-   two-tab session, browser topology, cached tool names, react-select commit).
+## Non-negotiables
 
-Then, per concern (read only the one you need):
+| Rule | Owner | If you break it |
+|---|---|---|
+| Personal data has ONE source | `config/user.json` → `skills/REFERENCE.md#identity` | `lint_identity` fails |
+| Resume uploads inject, never click | `skills/resume/SKILL.md#upload-method` | a native OS picker opens and blocks the run |
+| Socket call has ONE owner | `core/ctl.py` | the `socket-call-single-owner` boundary fails |
+| Scrolling is bounded | `core/ui.py::scroll_until` | the page scrolls for seconds on a miss |
+| CAPTCHA: fill everything, then stop | `skills/REFERENCE.md#standing-rule--captcha-handling` | — |
+| No full-page images or raw screenshots in model context; DOM first, local OCR if needed | `skills/REFERENCE.md` | images re-sent every turn |
+| Jev classifies, never writes; no PII to Jev | `skills/jev/SKILL.md` | third-party leak or a confident wrong answer |
+| Layering is one-way | `apply/ → find/ → core/` | the `layering` gate fails |
 
-| Task | Read |
+## When a gate fails
+
+Fix the cause. Never:
+
+- add `# noqa`, `# type: ignore`, or an ignore-list entry to make it green
+- delete code to lower a duplication number
+- move `.jscpd.json` (paths resolve from its folder — elsewhere it silently passes)
+- edit `third_party/`, `temp/`, `scratch/`, or `archive/`
+
+Known debt is recorded in `docs/QUALITY.md`. Do not "fix" debt listed there
+without proving behavioural equivalence first.
+
+## Commits
+
+Never `git commit` or `git push` unless the user asks. Never `git checkout --`
+or `git reset --hard` on work you did not create.
+
+## Detailed knowledge
+
+| Need | File |
 |---|---|
-| Resume + MD5 gates | `skills/resume/SKILL.md` |
-| Find jobs | `skills/find/SKILL.md` |
-| Apply (ATS router) | `skills/apply/SKILL.md` + the matching `skills/recipes/<ats>.md` |
-| Verify submission | `skills/verify/SKILL.md` |
-| Email recruiters | `skills/email/SKILL.md` + `skills/recipes/email-template-humble.md` |
-| Track applications | `skills/track/SKILL.md` |
-| Learn / record lessons | `skills/learn/SKILL.md` → `skills/LESSONS/LESSONS-*.md` |
-| Ops (servers/tools) | `skills/ops/SKILL.md` |
-| Web search (private SearXNG) | `skills/searxng/SKILL.md` — if you need searching use http://127.0.0.1:8080 |
+| Which ATS, what it does | `skills/recipes/<ats>.md` |
+| Cheap decision instead of a main-model turn | `skills/jev/SKILL.md` |
+| Fresh-clone Pi/Jev setup | `docs/INSTALL.md` (via `skills/pi-setup/SKILL.md`) |
+| Find existing scripts and ATS recipes | `skills/tool-map/SKILL.md` |
+| Live ATS failure history | `skills/LESSONS.md` (newest section first) |
+| Tool decisions + measurements | `docs/QUALITY.md` |
+| Install / dependencies | `docs/INSTALL.md` |
+| Private web search (SearXNG) | `skills/searxng/SKILL.md` → `http://127.0.0.1:8080` |
 
-**Recipes** (`skills/recipes/`): per-ATS mechanics — `workday`, `greenhouse`, `lever`,
-`icims`, `linkedin`, `phenom`, `breezy`, `jobvite`, `oraclehcm`, `email-template-humble`.
+## Repository map
 
-**Lessons** (`skills/LESSONS/`): accumulated hard-won learnings, one file per concern.
+```text
+README.md           ← human overview
+hub.py              ← cross-platform CLI (single entry point)
+installer.py        ← interactive cross-platform installer
+eval.py             ← readiness evaluation (% success rate)
+setup.py            ← identity/credentials wizard (also imported by onboarding.py)
+onboarding.py       ← resume-first guided setup
+resume_parser.py    ← heuristic resume PDF reader
 
-**Index:** `skills/README.md` (graph summary).
-
-**Cross-links:** every node ends with a `## RELATED` footer pointing to every other
-node + recipes + lessons, so the graph is navigable from any single skill file.
-
-**Tools → files map & MCP index:** `skills/ops/SKILL.md` (sections `TOOL → FILE MAP`
-and `MCP INDEX`) maps each capability to the file that owns it and every MCP server
-to its owner/consumer.
-
----
-
-## 6. Skill frontmatter convention
-
-Each `skills/*/SKILL.md` has YAML frontmatter with `name`, `description` (triggers),
-and `parent` (graph edge). When a task matches a node's description, read that node +
-its `parent` chain once per session — do not re-read unchanged files repeatedly.
-
----
-
-## 7. Session-start checklist (any agent)
-
-1. Read `AGENTS.md` (this file) + `skills/SKILL.md` + `skills/REFERENCE.md` once.
-2. Load `config/user.json` + `config/progress.json` (if present) via `config/answers.py`.
-3. Confirm the browser stack is up (`python3 hub.py health`) before any browser work.
-4. If you need web search, use local SearXNG at `http://127.0.0.1:8080`
-   (setup: `python3 infra/searxng/setup.py` · skill: `skills/searxng/SKILL.md`).
-5. Never invent personal data — resolve everything from `config/answers.py` (`A`).
-6. Proof gate: no success message (DOM/OCR) + confirmation email = NOT "applied".
-
----
-
-## 8. User-consent boundaries
-
-- **Gmail** is used ONLY with explicit consent (recorded as `gmail_consent` in
-  `config/user.json`): read OTPs, read confirmations, register/log into ATS accounts,
-  and draft/send cold emails (drafts by default; sending requires a fresh user approval).
-- **CAPTCHA is a hard stop:** finish safe non-CAPTCHA fields, then leave the headed page open for the user. Never solve/bypass CAPTCHA and never click or trigger submit after detecting one. No automated submit resumes if one was encountered.
-- **Biometrics / secrets** are user-only pauses — never bypass.
-- Never create duplicate accounts; never store passwords in logs/skills/progress files.
+core/               ← browser control, resume gates, ledger, dedupe, OCR, decision layer
+apply/              ← apply drivers (li_drive, li_listed_apply, gh_apply, ih_sweep, fill_gh_fast)
+find/               ← job discovery (sweeps, preflight, ats_resolve, tracker_reconcile)
+config/             ← answers.py (A dict), dedupe.py, user.json.example, pi config templates
+runtime/server.py   ← ctl bridge :9000 (the ONLY tracked file under runtime/)
+infra/searxng/      ← local private web search (auto-setup + docker-compose)
+scripts/            ← check.sh (the gate), start_mcp.sh, clean.sh, cost_report.py, setup_pi.sh
+tests/              ← organized test suite (run: python3 hub.py test)
+skills/             ← the skill graph (see below)
+```

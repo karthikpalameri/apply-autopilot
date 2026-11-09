@@ -1,6 +1,6 @@
 # Humble application email template (respectful, low-pressure)
 TO: <recruiter-email>
-SUBJECT: Application – QA/SDET – Bangalore – <Your Name> (<years> yrs)
+SUBJECT: Application – QA/SDET – Bangalore – <Your Name> (8 yrs)
 
 BODY:
 Dear <Name/Recruiter>,
@@ -9,7 +9,7 @@ I hope this message finds you well. I came across your post about
 QA/SDET opportunities and, with your kind permission, I would like to
 submit my application.
 
-I am a Senior QA Engineer with <years> years of experience, currently at
+I am a Senior QA Engineer with 8 years of experience, currently at
 <Current Company> where I validate the <product> payments platform
 (UPI, cards, payments). My core skills are Selenium, Appium, RestAssured,
 Postman, Java, Python, API testing, and CI/CD.

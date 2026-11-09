@@ -1,6 +1,6 @@
 # ORACLE HCM recipe (Oracle · Pearson ×2 · Nokia · WESCO-type)
 ## URL: <co>.fa.*.oraclecloud.com/hcmUI/CandidateExperience/.../job/<id>/apply
-## WINS: Pearson ×2, Oracle (90%), Nokia(3-field block) | FLOW:
+## WINS: Pearson ×2, Oracle (90%), Nokia(3-field block) | FLOW
 
 1. EMAIL screen: `primary-email-0` or `-1` (varies per instance) → fill email.
    ACCEPT consent → T&C dialog "Agree" = `button.app-dialog__footer-button`.

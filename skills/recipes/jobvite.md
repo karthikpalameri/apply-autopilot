@@ -1,6 +1,6 @@
 # JOBVITE recipe (Nutanix)
 ## URL: jobs.jobvite.com/<co>/job/<id>/apply
-## WIN: Nutanix Staff SDET ✅ | FLOW:
+## WIN: Nutanix Staff SDET ✅ | FLOW
 
 1. Data Consent screen: select `#jv-country-select` (index 1 = All Locations) →
    "Submit" (by clicking Submit you acknowledge privacy).

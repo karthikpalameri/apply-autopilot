@@ -1,6 +1,6 @@
 # freehire integration — additive discovery source (SoC)
 
-freehire (https://github.com/strelov1/freehire, MIT) is an open-source,
+freehire (<https://github.com/strelov1/freehire>, MIT) is an open-source,
 self-hostable job catalogue that crawls 3.3M+ postings from 124 ATS platforms
 and enriches each with LLM facets. Its companion CLI (freehire-cli) is a thin
 client + MCP server over the same API.
@@ -19,11 +19,11 @@ uses the keyless local `find/freehire_sweep.py` integration, not the CLI binary.
 
 | Component | URL | Tracked as |
 |---|---|---|
-| freehire engine (catalogue + API) | https://github.com/strelov1/freehire.git | git submodule `third_party/freehire` |
-| freehire-cli (Go CLI + MCP) | https://github.com/strelov1/freehire-cli.git | git submodule `third_party/freehire-cli` |
-| freehire public API (keyless) | https://freehire.me/api/v1 | network (no local clone needed) |
-| freehire API reference | https://freehire.me/docs/api | docs |
-| CLI prebuilt binary | https://freehire.me/install.sh | optional (auth commands only) |
+| freehire engine (catalogue + API) | <https://github.com/strelov1/freehire.git> | git submodule `third_party/freehire` |
+| freehire-cli (Go CLI + MCP) | <https://github.com/strelov1/freehire-cli.git> | git submodule `third_party/freehire-cli` |
+| freehire public API (keyless) | <https://freehire.me/api/v1> | network (no local clone needed) |
+| freehire API reference | <https://freehire.me/docs/api> | docs |
+| CLI prebuilt binary | <https://freehire.me/install.sh> | optional (auth commands only) |
 
 **Fresh clone → working in one step:**
 ```bash
@@ -43,13 +43,13 @@ market-fit, ghost reports, and future agent actions) must not run anonymously.
 
 ```bash
 # Install the CLI if `freehire` is not already on PATH.
-curl -fsSL https://freehire.me/install.sh | sh
+curl -fsSL <https://freehire.me/install.sh> | sh
 
 # Verify first; if absent or invalid, complete browser sign-in.
 if ! freehire auth status; then
   freehire auth login
 fi
-freehire auth status   # must print: Authenticated as <account> @ https://freehire.me
+freehire auth status   # must print: Authenticated as <account> @ <https://freehire.me>
 ```
 
 Run the install/login block from a real interactive terminal: the installer may
@@ -63,9 +63,9 @@ stop the Freehire workflow and ask the operator to sign in before continuing.
 
 After authentication, finish the Freehire profile before searching or applying:
 
-1. Open `https://freehire.me/my/profile` while signed in.
+1. Open `<https://freehire.me/my/profile`> while signed in.
 2. Under **Your CV**, upload the canonical repository resume:
-   `config/Firstname_Lastname_Role.pdf`.
+   `config/Your_Name_Resume.pdf`.
 3. Wait for the upload confirmation and CV parsing result; click **Create profile**
    when enabled.
 4. Verify from the terminal:
@@ -83,7 +83,7 @@ rather than using a renamed or generated resume.
 
 Three layers, one owner each — mirrors the repo's `core/` · `config/` · `find/` split:
 
-```
+```text
 config/freehire.py        DATA       filters, gates, ROUTING map (single source of truth)
 core/freehire_client.py   TRANSPORT  HTTP/SSL/envelope parsing + logging (SRP, no rules)
 find/freehire_sweep.py    USE-CASE   discovery orchestration: client → gates → dedupe → route
@@ -108,7 +108,7 @@ find/freehire_sweep.py    USE-CASE   discovery orchestration: client → gates �
 ```
 
 Keyless — no auth. Under the hood:
-`GET https://freehire.me/api/v1/agent/jobs/search?category=qa&cities=bangalore&sort=posted_at&order=desc`
+`GET <https://freehire.me/api/v1/agent/jobs/search?category=qa&cities=bangalore&sort=posted_at&order=desc`>
 plus an `q=sdet&q_fields=title` pass, merged and deduped by `public_slug`.
 
 ## Gates applied (mirrors skills/find/SKILL.md)

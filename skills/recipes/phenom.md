@@ -1,6 +1,6 @@
-# PHENOM recipe (proven)
+# PHENOM recipe (Lilly · FIS · Cisco · WBD-careers)
 ## URL: careers.<co>/global|us/en/apply?step=1&stepname=personalInformation
-## WINS: multiple product companies via this flow | FAILS: none with this flow
+## WINS: Lilly, Cisco, WBD(redirect), FIS(recaptcha-gated) | FAILS: none with this flow
 
 ## FILL — one Playwright transaction (`.fill()` + `selectOption()`)
 - Use `browser_run_code_unsafe` with `const { page } = cloak;`; do not use an `async (page) => ...` wrapper.
@@ -16,9 +16,10 @@
 4. Re-select country/device/ccode (resume re-render wipes them).
 5. Experience: resume auto-parses. FIX: degree select = "Bachelor of Engineering"
    (auto-picks "Associates" — wrong), WE1 "currently work here" check, hidden `school` field set.
-6. Questions: selects via selectOption (auth=Yes, sponsor=No, salary=<expected CTC numeric>, join=1-3mo).
+6. Questions: selects via selectOption (auth=Yes, sponsor=No, salary=<your expected CTC>, join=1-3mo).
 7. Some questions are REACT-SELECTS disguised as text inputs:
    `click input → ArrowDown → getByRole('option', {name, exact:true}).first().click()`
    (check parent class: `select-shell remix-css...-container`)
-8. If any CAPTCHA/reCAPTCHA is present, stop after the other safe fields are verified. Never solve or bypass it, and never click/trigger submit; leave the headed page open for the user.
-9. Only when no CAPTCHA was encountered, follow the normal user-authorized submit and proof flow. If a CAPTCHA was encountered, hand off without automated submission.
+8. reCAPTCHA (FIS): hard stop — finish safe fields, leave the page for the user, record
+   `waiting-user-captcha`. Next may stay disabled (Phenom reads widget state, not textarea) → human click fallback.
+9. Submit → capture `applythankyou?status=success&jobSeqNo=...` and the exact success text immediately in the same FORM state = PROOF. Gmail can be checked in the combined batch pass.
