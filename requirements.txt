@@ -1,8 +1,14 @@
-# Python dependencies for Apply Autopilot.
-# Install with:  python3 hub.py install   (creates .venv and installs these)
-cloakbrowser>=1.0.0          # stealth Chromium / Playwright browser engine (bundles playwright)
-pypdf>=4.0.0                 # read resume PDF (used for integrity checks)
-Pillow>=10.0.0               # image handling for OCR screenshots
-pytesseract>=0.3.10          # OCR wrapper (core/see.py, core/verify.py)
-requests>=2.31.0             # HTTP for ATS APIs (find/prod_sweep.py)
-certifi>=2024.0.0            # TLS certs for API calls
+# Apply Autopilot — direct Python dependencies (SINGLE SOURCE OF TRUTH).
+# Install:  .venv/bin/pip install -r requirements.txt
+#
+# Only what the code imports directly is pinned here. cloakbrowser brings the
+# rest transitively (cryptography, greenlet, pyee, cffi, pycparser, certifi) —
+# see docs/DEPENDENCIES.md for the full graph. Pins are the known-good versions;
+# bump playwright/httpx together with cloakbrowser (it requires playwright>=1.40,
+# httpx>=0.24).
+cloakbrowser==0.5.11   # browser engine (Playwright + stealth Chromium) — runtime/server.py
+pypdf==6.21.4          # read resume PDF — find/resume_facts.py, resume_parser.py
+httpx==0.28.1          # connection pooling — core/fetch.py, core/freehire_client.py
+playwright==1.63.0     # imported directly by runtime/server.py (sync_api); also a cloakbrowser dep
+certifi==2026.10.23    # TLS certs — core/fetch.py, apply/gh_apply.py, find/*
+Pillow>=10.0.0         # image handling (resume_parser.py, eval.py readiness check)

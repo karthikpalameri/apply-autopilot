@@ -13,10 +13,10 @@ RUNTIME_FILES = {
     "config/user.json", "config/profile.json", "config/profile.md",
     "config/progress.json", "config/applied_vs_not_applied.md",
     "config/product_companies_tracker.md", "config/mcp_session.json",
-    "config/resume.md5", "config/targets.json",
+    "config/resume.md5", "config/resume_facts.json", "config/targets.json",
 }
 
-NODES = ["apply", "email", "find", "learn", "ops", "resume", "searxng", "track", "verify"]
+NODES = ["apply", "email", "find", "jev", "learn", "ops", "pi-setup", "resume", "searxng", "tool-map", "track", "verify"]
 
 
 def is_runtime_file(p):
@@ -30,7 +30,7 @@ class TestSkills(unittest.TestCase):
                             f"missing skills/{n}/SKILL.md")
 
     def test_frontmatter(self):
-        for root, dirs, files in os.walk(os.path.join(ROOT, "skills")):
+        for root, _dirs, files in os.walk(os.path.join(ROOT, "skills")):
             for f in files:
                 if f != "SKILL.md":
                     continue
@@ -46,7 +46,7 @@ class TestSkills(unittest.TestCase):
 
     def test_links_resolve(self):
         broken = []
-        for root, dirs, files in os.walk(os.path.join(ROOT, "skills")):
+        for root, _dirs, files in os.walk(os.path.join(ROOT, "skills")):
             for f in files:
                 if not f.endswith(".md"):
                     continue

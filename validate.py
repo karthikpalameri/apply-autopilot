@@ -27,11 +27,8 @@ RUNTIME_FILES = {
 
 
 def is_runtime_file(path):
-    if path in RUNTIME_FILES:
-        return True
-    if path.startswith("config/li_") and path.endswith(".json"):
-        return True
-    return False
+    return (path in RUNTIME_FILES
+            or (path.startswith("config/li_") and path.endswith(".json")))
 
 
 FAILS = []
@@ -66,7 +63,7 @@ def check_py_files():
 
 def check_skill_frontmatter():
     print("\n[2/3] Skill frontmatter + links")
-    for root, dirs, files in os.walk(os.path.join(HUB, "skills")):
+    for root, _dirs, files in os.walk(os.path.join(HUB, "skills")):
         for f in files:
             if f != "SKILL.md":
                 continue

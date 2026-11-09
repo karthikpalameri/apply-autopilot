@@ -188,9 +188,9 @@ def install_system_tools(interactive=True):
             return False
     print("  Installing…")
     for name, cmds, opt in missing:
-        if name in ("docker",) and opt and interactive:
-            if input(f"  Install optional {name} too? [y/N]: ").strip().lower() not in ("y", "yes"):
-                continue
+        if (name in ("docker",) and opt and interactive
+                and input(f"  Install optional {name} too? [y/N]: ").strip().lower() not in ("y", "yes")):
+            continue
         if cmds:
             for c in cmds:
                 run(c)
@@ -261,7 +261,7 @@ def configure_pi():
     }}}
     with open(os.path.join(agent_dir, "mcp-adapter.json"), "w") as f:
         json.dump(mcp_cfg, f, indent=2)
-    print(f"  ✅ wrote ~/.pi/agent/mcp-adapter.json")
+    print("  ✅ wrote ~/.pi/agent/mcp-adapter.json")
 
     ws = {"provider": "all", "searxngBaseUrl": "http://127.0.0.1:8080"}
     with open(os.path.expanduser("~/.pi/web-search.json"), "w") as f:

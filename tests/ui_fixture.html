@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UI element fixture — job-apply-hub</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 24px auto; }
+  fieldset { margin: 14px 0; padding: 10px 14px; }
+  label { display: inline-block; min-width: 190px; }
+  input, select, textarea { margin: 3px 0; }
+  .rs { position: relative; display: inline-block; }
+  .rs-input { width: 200px; }
+  .rs-menu { position: absolute; background: #fff; border: 1px solid #999; width: 200px; display: none; }
+  .rs-menu.open { display: block; }
+  .rs-option { padding: 4px 8px; cursor: pointer; }
+  .rs-option:hover { background: #eee; }
+</style>
+</head>
+<body>
+<h1>UI element fixture</h1>
+<p id="status">not submitted</p>
+
+<form id="form" onsubmit="event.preventDefault(); document.getElementById('status').textContent='submitted: '+this.checkValidity();">
+  <fieldset>
+    <legend>Text inputs</legend>
+    <label for="f-text">text</label><input id="f-text" name="text" type="text"><br>
+    <label for="f-email">email</label><input id="f-email" name="email" type="email"><br>
+    <label for="f-pass">password</label><input id="f-pass" name="password" type="password"><br>
+    <label for="f-num">number</label><input id="f-num" name="number" type="number"><br>
+    <label for="f-tel">telephone</label><input id="f-tel" name="tel" type="tel"><br>
+    <label for="f-textarea">textarea</label><textarea id="f-textarea" name="textarea" rows="2" cols="26"></textarea>
+  </fieldset>
+
+  <fieldset>
+    <legend>Native select</legend>
+    <label for="s-single">single select</label>
+    <select id="s-single" name="single">
+      <option value="">-- choose --</option>
+      <option value="in">India</option>
+      <option value="us">United States</option>
+      <option value="uk">United Kingdom</option>
+    </select><br>
+    <label for="s-multi">multi select</label>
+    <select id="s-multi" name="multi" multiple size="3">
+      <option value="py">Python</option>
+      <option value="pw">Playwright</option>
+      <option value="sel">Selenium</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Date (the awkward one)</legend>
+    <label for="d-native">input type=date</label><input id="d-native" name="date" type="date"><br>
+    <label>three dropdowns</label>
+    <select id="d-day" name="day"><option value="">Day</option>
+      <option>1</option><option>15</option><option>28</option></select>
+    <select id="d-month" name="month"><option value="">Month</option>
+      <option>January</option><option>November</option><option>December</option></select>
+    <select id="d-year" name="year"><option value="">Year</option>
+      <option>1990</option><option>1994</option><option>2000</option></select>
+  </fieldset>
+
+  <fieldset>
+    <legend>Radio and checkbox</legend>
+    <label><input type="radio" name="title" id="r-mr" value="Mr"> Mr</label>
+    <label><input type="radio" name="title" id="r-mrs" value="Mrs"> Mrs</label><br>
+    <label><input type="checkbox" id="c-news" name="newsletter" value="1"> newsletter</label>
+    <label><input type="checkbox" id="c-offers" name="offers" value="1"> offers</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>File</legend>
+    <label for="f-file">resume</label><input id="f-file" type="file" name="resume">
+  </fieldset>
+
+  <fieldset>
+    <legend>Custom div dropdown (react-select shape)</legend>
+    <div class="rs" id="rs">
+      <input class="rs-input" id="rs-input" placeholder="search…" autocomplete="off">
+      <div class="rs-menu" id="rs-menu">
+        <div class="rs-option">Bangalore</div>
+        <div class="rs-option">Hyderabad</div>
+        <div class="rs-option">Chennai</div>
+      </div>
+    </div>
+  </fieldset>
+
+  <button type="submit" id="submit">Submit</button>
+</form>
+
+<script>
+  // minimal react-select imitation: typing opens the menu, clicking an option fills it
+  const inp = document.getElementById('rs-input');
+  const menu = document.getElementById('rs-menu');
+  inp.addEventListener('input', () => menu.classList.add('open'));
+  menu.addEventListener('click', e => {
+    if (e.target.classList.contains('rs-option')) {
+      inp.value = e.target.textContent;
+      menu.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>

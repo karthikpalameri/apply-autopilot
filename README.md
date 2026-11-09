@@ -1,9 +1,9 @@
 # 🎯 Apply Autopilot — automated job applications with *your* resume
 
-[![tests](https://img.shields.io/badge/tests-47%20passing%20(local)-brightgreen.svg)](tests/README.md)
+[![tests](https://img.shields.io/badge/tests-66%20passing%20(local)-brightgreen.svg)](tests/README.md)
 [![version](https://img.shields.io/badge/version-0.0.1-blue.svg)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#)
+[![platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](README.md)
 [![privacy](https://img.shields.io/badge/personal%20data-none%20committed-brightgreen.svg)](PRIVACY.md)
 
 Find QA/SDET (or any role) openings at product companies → verify they match → apply
@@ -83,10 +83,10 @@ See `skills/resume/SKILL.md`.
 
 ## Architecture (SOC)
 
-```
-core/    ctl.py (CDP :9000) · browser.py (:3000 MCP) · captcha_guard.py · see.py (OCR)
-core/    resume_secure.py (resume + MD5 gates) · gmail_read.py · verify.py
-core/    freehire_client.py (freehire API transport — SRP)
+```text
+core/    ctl.py (CDP :9000) · browser.py (:3000 MCP) · page_guard.py · ocr.py
+core/    resume_secure.py (resume + MD5 gates) · applied_ledger.py · decide.py · ui.py · dom.py
+core/    fetch.py (httpx) · freehire_client.py (freehire API transport — SRP) · gmail_read.py
 apply/   li_drive · ih_sweep · fill_gh_fast · gh_apply (generic Greenhouse) · li_listed_apply
 find/    prod_sweep (ATS APIs) · freehire_sweep (freehire API) · product_companies_builder/lookup · tracker_reconcile · sweep
 config/  answers.py (single source of truth) · freehire.py (freehire filters/gates/routing) · user.json.example
@@ -141,37 +141,37 @@ verifiably, and without leaking your data. All credit goes to the projects below
 ### 🤖 Agent & runtime glue
 | Project | What we use it for | Link |
 |---|---|---|
-| **pi** (`@earendil-works/pi-coding-agent`) | the coding-agent runtime that drives everything | https://www.npmjs.com/package/@earendil-works/pi-coding-agent |
-| **context-mode** (+ `ctx-*` skills) | agent skills for context/tooling | https://www.npmjs.com/package/context-mode |
-| **pi-mcp-adapter** | pi ↔ MCP bridge | https://www.npmjs.com/package/pi-mcp-adapter |
-| **pi-web-access** | web-search tooling for the agent | https://www.npmjs.com/package/pi-web-access |
+| **pi** (`@earendil-works/pi-coding-agent`) | the coding-agent runtime that drives everything | <https://www.npmjs.com/package/@earendil-works/pi-coding-agent> |
+| **context-mode** (+ `ctx-*` skills) | agent skills for context/tooling | <https://www.npmjs.com/package/context-mode> |
+| **pi-mcp-adapter** | pi ↔ MCP bridge | <https://www.npmjs.com/package/pi-mcp-adapter> |
+| **pi-web-access** | web-search tooling for the agent | <https://www.npmjs.com/package/pi-web-access> |
 
 ### 🌐 Browser automation & MCP
 | Project | What we use it for | Link |
 |---|---|---|
-| **Playwright** (Microsoft) | driving the real, **headed** browser | https://playwright.dev |
-| **Playwright MCP** (Microsoft) | the HTTP `:3000` browser-tool surface | https://github.com/microsoft/playwright-mcp |
-| **cloakbrowser** (PyPI) | stealth Chromium engine (bundles Playwright) | https://pypi.org/project/cloakbrowser/ |
-| **cloak-browser-mcp** (`@devinwangd/cloak-browser-mcp`) | stealth Chromium MCP server | https://www.npmjs.com/package/@devinwangd/cloak-browser-mcp |
-| **Model Context Protocol (MCP)** (Anthropic) | the standard tool protocol for agents | https://modelcontextprotocol.io |
-| **Chromium** | the browser itself | https://www.chromium.org |
+| **Playwright** (Microsoft) | driving the real, **headed** browser | <https://playwright.dev> |
+| **Playwright MCP** (Microsoft) | the HTTP `:3000` browser-tool surface | <https://github.com/microsoft/playwright-mcp> |
+| **cloakbrowser** (PyPI) | stealth Chromium engine (bundles Playwright) | <https://pypi.org/project/cloakbrowser/> |
+| **cloak-browser-mcp** (`@devinwangd/cloak-browser-mcp`) | stealth Chromium MCP server | <https://www.npmjs.com/package/@devinwangd/cloak-browser-mcp> |
+| **Model Context Protocol (MCP)** (Anthropic) | the standard tool protocol for agents | <https://modelcontextprotocol.io> |
+| **Chromium** | the browser itself | <https://www.chromium.org> |
 
 ### 🔎 Search
 | Project | What we use it for | Link |
 |---|---|---|
-| **SearXNG** | private local metasearch + JSON API | https://github.com/searxng/searxng |
-| **Docker** | runs the SearXNG container | https://www.docker.com |
-| **Valkey** | SearXNG's cache backend | https://valkey.io |
+| **SearXNG** | private local metasearch + JSON API | <https://github.com/searxng/searxng> |
+| **Docker** | runs the SearXNG container | <https://www.docker.com> |
+| **Valkey** | SearXNG's cache backend | <https://valkey.io> |
 
 ### 🧾 Resume, documents & OCR
-- **pypdf** — read/verify resume PDFs — https://github.com/py-pdf/pypdf
-- **Pillow (PIL)** — image handling for OCR screenshots — https://python-pillow.org
-- **pytesseract** — OCR wrapper — https://github.com/madmaze/pytesseract
-- **Tesseract OCR** — the OCR engine — https://github.com/tesseract-ocr/tesseract
+- **pypdf** — read/verify resume PDFs — <https://github.com/py-pdf/pypdf>
+- **Pillow (PIL)** — image handling (resume_parser) — <https://python-pillow.org>
+- **Tesseract OCR** — the OCR engine — <https://github.com/tesseract-ocr/tesseract>
 
 ### 🕸️ HTTP & TLS
-- **requests** — HTTP for ATS APIs — https://requests.readthedocs.io
-- **certifi** — TLS certificate bundle — https://github.com/certifi/python-certifi
+- **httpx** — connection pooling for ATS APIs — <https://www.python-httpx.org>
+- **certifi** — TLS certificate bundle — <https://github.com/certifi/python-certifi>
+- **Playwright** — browser automation (via runtime/server.py) — <https://playwright.dev>
 
 ### 🛑 CAPTCHA safety
 CAPTCHA pages are a hard stop. Automation never solves or bypasses a challenge and never
@@ -179,43 +179,43 @@ clicks or triggers submit after detecting one; the headed page is left open for 
 There is no external CAPTCHA-solving API key or service integration.
 
 ### 📨 Email / OTP (stdlib, no third party)
-- **Python** `imaplib` / `smtplib` / `email` — https://www.python.org
-- **Gmail App Passwords** — https://support.google.com/accounts/answer/185833
+- **Python** `imaplib` / `smtplib` / `email` — <https://www.python.org>
+- **Gmail App Passwords** — <https://support.google.com/accounts/answer/185833>
 
 ### 🖥️ System tools & package managers
-- **Python** — https://www.python.org · **pip / PyPA** — https://pip.pypa.io · **Node.js / npm / npx** — https://nodejs.org
-- **macOS:** **Homebrew** — https://brew.sh
-- **Linux:** **apt** — https://wiki.debian.org/Apt · **dnf** — https://github.com/rpm-software-management/dnf · **pacman** — https://archlinux.org/pacman/ · **zypper** — https://en.opensuse.org/Portal:Zypper
-- **Windows:** **winget** (Microsoft) — https://github.com/microsoft/winget-cli · **Chocolatey** — https://chocolatey.org · **Scoop** — https://scoop.sh
-- **Git** — https://git-scm.com · **Docker** — https://www.docker.com · **curl** — https://curl.se
+- **Python** — <https://www.python.org> · **pip / PyPA** — <https://pip.pypa.io> · **Node.js / npm / npx** — <https://nodejs.org>
+- **macOS:** **Homebrew** — <https://brew.sh>
+- **Linux:** **apt** — <https://wiki.debian.org/Apt> · **dnf** — <https://github.com/rpm-software-management/dnf> · **pacman** — <https://archlinux.org/pacman/> · **zypper** — <https://en.opensuse.org/Portal:Zypper>
+- **Windows:** **winget** (Microsoft) — <https://github.com/microsoft/winget-cli> · **Chocolatey** — <https://chocolatey.org> · **Scoop** — <https://scoop.sh>
+- **Git** — <https://git-scm.com> · **Docker** — <https://www.docker.com> · **curl** — <https://curl.se>
 
 ### 🏢 ATS platforms & public job boards (the things we apply *to*)
 We don't own these — we only talk to their public job boards / APIs.
-- **Greenhouse** — https://www.greenhouse.io (public Boards API)
-- **Lever** — https://www.lever.co (public Postings API)
-- **Workday** — https://www.workday.com · **Phenom** — https://www.phenom.com
-- **iCIMS** — https://www.icims.com · **SAP SuccessFactors** — https://www.sap.com/products/hcm.html
-- **SmartRecruiters** — https://www.smartrecruiters.com · **Ashby** — https://www.ashbyhq.com
-- **Jobvite** — https://www.jobvite.com · **Rippling** — https://www.rippling.com
-- **Oracle HCM (Fusion)** — https://www.oracle.com/human-capital-management/ · **Select2** — https://select2.org
-- Job sources: **LinkedIn** — https://www.linkedin.com · **Naukri** — https://www.naukri.com · **InstaHyre** — https://www.instahyre.com
-- **freehire** — open-source job catalogue + keyless API — https://github.com/strelov1/freehire · https://freehire.me
-- **freehire-cli** — CLI/MCP over the freehire API — https://github.com/strelov1/freehire-cli
+- **Greenhouse** — <https://www.greenhouse.io> (public Boards API)
+- **Lever** — <https://www.lever.co> (public Postings API)
+- **Workday** — <https://www.workday.com> · **Phenom** — <https://www.phenom.com>
+- **iCIMS** — <https://www.icims.com> · **SAP SuccessFactors** — <https://www.sap.com/products/hcm.html>
+- **SmartRecruiters** — <https://www.smartrecruiters.com> · **Ashby** — <https://www.ashbyhq.com>
+- **Jobvite** — <https://www.jobvite.com> · **Rippling** — <https://www.rippling.com>
+- **Oracle HCM (Fusion)** — <https://www.oracle.com/human-capital-management/> · **Select2** — <https://select2.org>
+- Job sources: **LinkedIn** — <https://www.linkedin.com> · **Naukri** — <https://www.naukri.com> · **InstaHyre** — <https://www.instahyre.com>
+- **freehire** — open-source job catalogue + keyless API — <https://github.com/strelov1/freehire> · <https://freehire.me>
+- **freehire-cli** — CLI/MCP over the freehire API — <https://github.com/strelov1/freehire-cli>
 
 ### 📚 Conventions, docs & tooling we lean on
-- **Keep a Changelog** — https://keepachangelog.com
-- **Semantic Versioning** — https://semver.org
-- **Conventional Commits** — https://www.conventionalcommits.org
-- **Shields.io** (badges) — https://shields.io
-- **MIT License** — https://opensource.org/license/mit
+- **Keep a Changelog** — <https://keepachangelog.com>
+- **Semantic Versioning** — <https://semver.org>
+- **Conventional Commits** — <https://www.conventionalcommits.org>
+- **Shields.io** (badges) — <https://shields.io>
+- **MIT License** — <https://opensource.org/license/mit>
 
 ### 🌍 Hosting & repo tooling
-- **GitHub** (hosting + Releases) — https://github.com · **GitHub Linguist** (`.gitattributes`) — https://github.com/github-linguist/linguist
-- **git-filter-repo** (used to scrub personal data from git history) — https://github.com/newren/git-filter-repo
+- **GitHub** (hosting + Releases) — <https://github.com> · **GitHub Linguist** (`.gitattributes`) — <https://github.com/github-linguist/linguist>
+- **git-filter-repo** (used to scrub personal data from git history) — <https://github.com/newren/git-filter-repo>
 
 ### 💡 Ideas we borrowed
 - The **agent "Skills"** pattern — a folder of `SKILL.md` files the agent reads on demand
-  (popularized by **Anthropic Claude Skills** — https://github.com/anthropics/skills).
+  (popularized by **Anthropic Claude Skills** — <https://github.com/anthropics/skills>).
 - **pre-check → act → post-check** transaction discipline, and the **Kaizen** continuous-improvement loop.
 - Public community write-ups on ATS form quirks, browser-automation reliability, and job-search tactics.
 - Software-design principles we lean on: **DRY** (one source of truth for your data),

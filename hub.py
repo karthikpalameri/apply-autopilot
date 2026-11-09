@@ -19,6 +19,7 @@ Usage:
 This is the recommended entry point on ALL platforms. The run.sh / run_li.sh / track.sh
 scripts are thin POSIX wrappers; run.bat / run_li.bat / track.bat are the Windows equivalents.
 """
+import contextlib
 import json
 import os
 import shutil
@@ -90,8 +91,9 @@ def read_pid(name):
     p = os.path.join(PID_DIR, name + ".pid")
     if os.path.exists(p):
         try:
-            return int(open(p).read().strip())
-        except Exception:
+            with open(p) as f:
+                return int(f.read().strip())
+        except (OSError, ValueError):
             return None
     return None
 
@@ -106,12 +108,10 @@ def kill_pid(name):
                            capture_output=True, text=True)
         else:
             os.kill(pid, signal.SIGTERM)
-    except Exception:
-        pass
-    try:
+    except Exception as e:
+        log(f"failed to kill {name} pid {pid}: {e}")
+    with contextlib.suppress(OSError):
         os.remove(os.path.join(PID_DIR, name + ".pid"))
-    except OSError:
-        pass
     return True
 
 
@@ -222,32 +222,54 @@ def cmd_start():
         _spawn("server", [vp, os.path.join("runtime", "server.py")])
         log(f"started runtime/server.py (:{CTL_PORT})")
 
-    # 2. cloakbrowser-mcp :3000
+    # 2. cloakbrowser-mcp :3000 — separate profile so Pi's own browser (:runtime/mcp-session)
+    #    and this one never collide (a locked profile makes every call burn 5s).
+    profile = os.path.join(RUN_DIR, "py-session")
+    os.makedirs(profile, exist_ok=True)
     if port_in_use(MCP_PORT):
         log(f"port {MCP_PORT} already in use (cloakbrowser-mcp likely running)")
     else:
-        lock = os.path.join(RUN_DIR, "mcp-session", ".cloakbrowser-mcp-profile.lock")
-        if os.path.exists(lock):
-            try:
-                os.remove(lock)
-            except OSError:
-                pass
+        lock = os.path.join(profile, ".cloakbrowser-mcp-profile.lock")
+        with contextlib.suppress(OSError):
+            os.remove(lock)
+        # keepalive: stop macOS App Nap / renderer throttling from killing an idle browser
+        keepalive = ("--disable-backgrounding-occluded-windows,"
+                     "--disable-renderer-backgrounding,"
+                     "--disable-background-timer-throttling,"
+                     "--disable-features=CalculateNativeWinOcclusion,IntensiveWakeUpThrottling")
         env = {
             "PLAYWRIGHT_MCP_HEADLESS": "false",
-            "PLAYWRIGHT_MCP_USER_DATA_DIR": os.path.join(RUN_DIR, "mcp-session"),
+            "PLAYWRIGHT_MCP_USER_DATA_DIR": profile,
             "PLAYWRIGHT_MCP_SNAPSHOT_BOXES": "false",
             "CLOAK_PLAYWRIGHT_MCP_CONSOLE_FALLBACK": "false",
             "CLOAK_VIEWPORT": CLOAK_VIEWPORT,
+            # upstream waits this long after EVERY action (default 500ms). 100 is the
+            # measured sweet spot (see docs/QUALITY.md) — 4.6x cheaper, still safe.
+            "PLAYWRIGHT_MCP_TIMEOUT_SETTLE": "100",
+            "PLAYWRIGHT_MCP_EXTRA_ARGS": keepalive,
         }
-        _spawn("mcp", [npx_cmd(), "-y", f"cloakbrowser-mcp@{CLOAKBROWSER_MCP_VERSION}",
-                       "--transport", "streamable-http", "--http-port", str(MCP_PORT)],
-               env=env)
-        log(f"started cloakbrowser-mcp (:{MCP_PORT})")
+        cmd = [npx_cmd(), "-y", f"cloakbrowser-mcp@{CLOAKBROWSER_MCP_VERSION}",
+               "--transport", "streamable-http", "--http-port", str(MCP_PORT),
+               "--cdp-enabled", "--cdp-port-range", "9333"]
+        _spawn("mcp", cmd, env=env)
+        log(f"started cloakbrowser-mcp (:{MCP_PORT}, profile=py-session, settle=100ms)")
 
     log("waiting for services to come up…")
-    time.sleep(8)
-    cmd_health()
-    return 0
+    _wait_healthy()
+    return cmd_health()
+
+
+def _wait_healthy():
+    """Poll the :3000 healthz endpoint instead of a guessed sleep."""
+    import urllib.request
+    for _ in range(40):
+        try:
+            urllib.request.urlopen(f"http://127.0.0.1:{MCP_PORT}/healthz", timeout=1).read()
+            log(":3000 healthy")
+            return
+        except Exception:
+            time.sleep(0.5)
+    log("⚠️  :3000 did not report healthy in 20s — see logs/mcp.out")
 
 
 def cmd_stop():

@@ -459,7 +459,7 @@ def write_profile_md(cfg, profile):
     ]
     with open(PROFILE_MD, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
-    print(f"  ✅ wrote config/profile.md")
+    print("  ✅ wrote config/profile.md")
 
 
 # ---------------------------------------------------------------- 8. save + finish
@@ -472,9 +472,9 @@ def save_and_finish(cfg, profile):
     print("\n" + "=" * 68)
     print("  ✅ PROFILE SAVED — you will NOT be asked these again.")
     print("=" * 68)
-    print(f"  • config/user.json     (identity + credentials, chmod 600)")
-    print(f"  • config/profile.json  (skills, achievements, interview answers)")
-    print(f"  • config/profile.md    (your profile + interview cheat sheet — open this!)")
+    print("  • config/user.json     (identity + credentials, chmod 600)")
+    print("  • config/profile.json  (skills, achievements, interview answers)")
+    print("  • config/profile.md    (your profile + interview cheat sheet — open this!)")
     print(f"  • resume upload name:  {cfg.get('resume_filename', '')}")
     print(f"  • Gmail consent:       {'✅ yes' if profile.get('gmail_consent') else '❌ no'}")
 

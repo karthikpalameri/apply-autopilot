@@ -197,9 +197,10 @@ def build_cases():
             req = urllib.request.Request("http://127.0.0.1:8080/search?q=test&format=json",
                                          headers={"Accept": "application/json"})
             with urllib.request.urlopen(req, timeout=3) as resp:
-                ok = resp.status == 200 and resp.read().strip()
+                body = resp.read().strip()
+                ok = resp.status == 200 and bool(body)
             return ok, ("reachable" if ok else "no answer")
-        except Exception as e:
+        except Exception:
             return False, "not running"
     cases.append(("sys.searxng", "SearXNG web search :8080 (optional)", 3, c_searxng,
                   "python3 infra/searxng/setup.py"))
@@ -223,7 +224,7 @@ def evaluate():
     cases = build_cases()
     total_weight = sum(c[2] for c in cases)
     earned = 0
-    passed = failed = warn = 0
+    passed = failed = 0
 
     print("=" * 72)
     print("  READINESS EVALUATION — Apply Autopilot")
@@ -232,7 +233,7 @@ def evaluate():
     print("-" * 72)
 
     failures = []
-    for cid, label, weight, fn, fix in cases:
+    for _cid, label, weight, fn, fix in cases:
         try:
             ok, detail = fn()
         except Exception as e:

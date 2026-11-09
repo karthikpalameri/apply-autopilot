@@ -10,10 +10,10 @@ Run:
     python3 setup.py --check    # print what's configured (never prints secrets)
 """
 import getpass
+import contextlib
 import hashlib
 import json
 import os
-import shutil
 import sys
 
 HUB = os.path.dirname(os.path.abspath(__file__))
@@ -72,10 +72,8 @@ def ask_int(prompt, default):
 
 def chmod600(path):
     if not IS_WINDOWS:
-        try:
+        with contextlib.suppress(OSError):
             os.chmod(path, 0o600)
-        except OSError:
-            pass
 
 
 def slugify(s):
@@ -200,8 +198,8 @@ def write_resume_md5(cfg):
     if os.path.exists(resume):
         h = hashlib.md5()
         with open(resume, "rb") as f:
-            for chunk in iter(lambda: f.read(1024 * 1024), b""):
-                h.update(chunk)
+            data = f.read()
+            h.update(data)
         with open(MD5_PATH, "w", encoding="utf-8") as f:
             f.write(f"{h.hexdigest()}  {resume}\n")
         print(f"✅ Wrote config/resume.md5 ({h.hexdigest()[:12]}…)")

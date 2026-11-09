@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
 export PYTHONUTF8=1
-# run_li.sh — restart the MCP server (fresh session) + run the LinkedIn listed-company apply pipeline.
-# POSIX only. Windows: use run_li.bat
-set -e
+# run_li.sh — restart the MCP server with a fresh session, then run the LinkedIn
+# listed-company apply pipeline.
+#
+# The launch itself lives in scripts/start_mcp.sh (healthz polling + profile-collision
+# fix). Note the longer --ttl: the apply pipeline has gaps of dozens of seconds
+# between tool calls, and the default idle TTL would drop the session mid-run.
+# Windows: use run_li.bat
+set -euo pipefail
 cd "$(dirname "$0")"
-CLOAKBROWSER_MCP_VERSION="${CLOAKBROWSER_MCP_VERSION:-latest}"
-rm -f runtime/mcp-session/.cloakbrowser-mcp-profile.lock 2>/dev/null || true
-CLOAK_VIEWPORT="${CLOAK_VIEWPORT:-1280x800}"
 
-kill -9 $(lsof -ti tcp:3000) 2>/dev/null || true
-sleep 2
-nohup env PLAYWRIGHT_MCP_HEADLESS=false PLAYWRIGHT_MCP_USER_DATA_DIR="$PWD/runtime/mcp-session" \
-  npx -y "cloakbrowser-mcp@${CLOAKBROWSER_MCP_VERSION}" --transport streamable-http --http-port 3000 \
-  --http-session-idle-ttl-ms 30000 > logs/mcp.out 2>&1 &
-sleep 15
+scripts/start_mcp.sh --restart --ttl 30000
 
 PY=.venv/bin/python
 [ -x "$PY" ] || PY=python3

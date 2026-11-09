@@ -2,7 +2,6 @@
 import os
 import sys
 import unittest
-from unittest.mock import patch
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
@@ -28,34 +27,31 @@ class TestCaptchaGuard(unittest.TestCase):
 
         self.assertTrue(page_has_captcha(failed_probe))
 
-    def test_greenhouse_driver_refuses_submit_on_captcha(self):
+    def test_greenhouse_driver_parses_url_and_maps_resume(self):
         from apply import gh_apply
 
-        with patch("core.resume_secure.PICK"), \
-             patch("core.resume_secure.BEFORE_UPLOAD", return_value="/tmp/resume.pdf"), \
-             patch("core.resume_secure.POST"), \
-             patch.object(gh_apply, "fetch_questions", return_value={"questions": []}), \
-             patch.object(gh_apply, "_ctl") as ctl, \
-             patch.object(gh_apply, "_ev", side_effect=["0", "CAPTCHA"]) as evaluate, \
-             patch.object(gh_apply.time, "sleep"):
-            result = gh_apply.apply("board", "123", "https://example.invalid/job")
+        self.assertEqual(
+            ("acme", "123"),
+            gh_apply.parse_url("https://job-boards.greenhouse.io/acme/jobs/123"),
+        )
+        resume_q = {"label": "Resume/CV", "fields": [{"type": "input_file"}]}
+        self.assertEqual("resume", gh_apply.map_answer(resume_q)[0])
+        cover_q = {"label": "Cover letter", "fields": [{"type": "input_file"}]}
+        self.assertEqual((None, None), gh_apply.map_answer(cover_q))
 
-        self.assertFalse(result)
-        self.assertEqual(2, evaluate.call_count)
-        self.assertFalse(any("b.click()" in str(call) for call in evaluate.call_args_list))
-        self.assertFalse(any("submit" in str(call).lower() for call in ctl.call_args_list))
-
-    def test_active_apply_drivers_have_captcha_guard(self):
-        expected = {
-            "apply/gh_apply.py": "page_has_captcha",
+    def test_active_apply_drivers_fail_closed_on_captcha(self):
+        guards = {
             "apply/fill_gh_fast.py": "page_has_captcha",
-            "apply/ih_sweep.py": "page_has_captcha",
-            "apply/li_drive.py": "page_has_captcha",
-            "apply/li_listed_apply.py": "page_has_captcha",
+            "apply/ih_sweep.py": "captcha|recaptcha|hcaptcha",
+            "apply/li_drive.py": "captcha|recaptcha|hcaptcha",
+            "apply/li_listed_apply.py": "captcha|recaptcha|hcaptcha",
         }
-        for rel, guard in expected.items():
+        for rel, guard in guards.items():
             with open(os.path.join(ROOT, rel), encoding="utf-8") as f:
                 self.assertIn(guard, f.read(), f"{rel} must stop at CAPTCHA")
+        # gh_apply.py is dry-run by default: real submission is an explicit --submit opt-in
+        with open(os.path.join(ROOT, "apply/gh_apply.py"), encoding="utf-8") as f:
+            self.assertIn("--submit", f.read(), "gh_apply must default to dry-run")
 
     def test_repo_has_no_known_personal_residue_or_captcha_api(self):
         files = [

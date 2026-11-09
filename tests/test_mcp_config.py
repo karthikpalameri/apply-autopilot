@@ -21,7 +21,7 @@ class TestMcpConfig(unittest.TestCase):
         cb = d["mcpServers"]["cloak-browser"]
         self.assertEqual("cloak-browser-mcp", cb["command"])
         self.assertIn("--headed", cb["args"], "must run headed, never headless")
-        self.assertTrue(any("--profile-dir" == a for a in cb["args"]))
+        self.assertTrue(any(a == "--profile-dir" for a in cb["args"]))
 
     def test_pi_web_search_example(self):
         p = os.path.join(ROOT, "config", "pi-web-search.json.example")

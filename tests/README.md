@@ -21,6 +21,10 @@ python3 tests/run_tests.py      # or:  python3 hub.py test
 | `test_eval.py` | readiness evaluator weights sum to 100% + every check runs |
 | `test_searxng.py` | SearXNG setup.py config generation (env + settings.yml, no Docker) |
 | `test_headed_browser.py` | browser ALWAYS headed (visible) — asserts no headless mode anywhere |
+| `test_console.py` | cross-platform UTF-8 console setup (Windows-safe reconfiguration) |
+| `test_hub.py` | `hub.py` command surface + helper functions |
+| `test_safety_and_generic.py` | fail-closed CAPTCHA handling + no-personal-data / no-captcha-API invariants |
+| `test_core_modules.py` | migrated engine: dedupe vocabulary, company/role identity, decision layer, `until()` poller, OCR |
 
 ## Adding a test
 

@@ -9,7 +9,9 @@
     "start": "python3 hub.py start",
     "stop": "python3 hub.py stop",
     "health": "python3 hub.py health",
-    "mcp": "npx -y cloakbrowser-mcp --transport streamable-http --http-port 3000"
+    "mcp": "bash scripts/start_mcp.sh",
+    "check": "bash scripts/check.sh",
+    "clean": "bash scripts/clean.sh"
   },
   "license": "MIT"
 }

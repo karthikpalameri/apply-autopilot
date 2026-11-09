@@ -212,9 +212,9 @@ def _achievements(text):
     lines = text.splitlines()
     ach = []
     for l in lines:
-        if re.search(r"\d+\s*%|reduced|improved|automated|increased|saved|delivered|built|led|migrated|cut|accelerated", l, re.I):
-            if 10 < len(l) < 160 and not EMAIL_RE.search(l):
-                ach.append(l.strip())
+        if (re.search(r"\d+\s*%|reduced|improved|automated|increased|saved|delivered|built|led|migrated|cut|accelerated", l, re.I)
+                and 10 < len(l) < 160 and not EMAIL_RE.search(l)):
+            ach.append(l.strip())
     return ach[:3]
 
 
