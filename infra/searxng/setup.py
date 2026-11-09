@@ -20,6 +20,7 @@ WHAT it does:
   4. waits and verifies:  curl "http://127.0.0.1:8080/search?q=test&format=json"
 """
 import json
+import contextlib
 import os
 import secrets
 import shutil
@@ -29,11 +30,12 @@ import sys
 import time
 import urllib.request
 
-try:  # Windows-safe UTF-8 console (this script prints emoji)
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
-except Exception:
-    pass
+# Windows-safe UTF-8 console (this script prints emoji)
+with contextlib.suppress(Exception):
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
 
 
 def _rel(p):
@@ -137,6 +139,7 @@ def verify_json(timeout=90):
     """Poll the JSON search API until it answers (container may take a while)."""
     url = f"{BASE_URL}/search?q=test&format=json"
     deadline = time.time() + timeout
+    last_err = None
     while time.time() < deadline:
         try:
             req = urllib.request.Request(url, headers={"Accept": "application/json"})
@@ -145,9 +148,11 @@ def verify_json(timeout=90):
                 if resp.status == 200 and data.strip():
                     d = json.loads(data)
                     return True, len(d.get("results", []))
-        except Exception:
-            pass
+        except Exception as e:
+            last_err = e
         time.sleep(3)
+    if last_err is not None:
+        log(f"last error while waiting: {last_err}")
     return False, 0
 
 
@@ -193,7 +198,7 @@ def main():
         print(f"  ✅ SearXNG is UP — test query returned {n} results")
         print(f"  Search URL: {BASE_URL}/search?q=...&format=json")
         print(f"  pi web-search config: ~/.pi/web-search.json → searxngBaseUrl: {BASE_URL}")
-        print(f"  Docs: https://github.com/searxng/searxng")
+        print("  Docs: https://github.com/searxng/searxng")
         return 0
     print("  ⚠️  container started but JSON API not answering yet.")
     print("  Check: docker compose ps / logs (run from infra/searxng):")
