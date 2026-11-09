@@ -2,18 +2,12 @@
 """verify.py — FAST combined DOM+OCR page verifier. Reads DOM (instant) + screenshot OCR, compares.
 Usage: verify.py [tag] — prints structured state. ~2s.
 """
-import json, socket, subprocess, sys
-
-def ctl(cmd, timeout=15):
-    s = socket.create_connection(("127.0.0.1", 9000), timeout=timeout)
-    s.sendall((json.dumps(cmd) + "\n").encode())
-    b = b""
-    while not b.endswith(b"\n"):
-        c = s.recv(65536)
-        if not c: break
-        b += c
-    s.close()
-    return json.loads(b.decode())
+import json, os, re, sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.ctl import call as ctl  # single owner (:9000 socket) — DRY
+from core.ocr import available as ocr_available, read as ocr  # single owner (tesseract)
+from core.hard_assert import POSITIVE  # single owner (proof patterns) — DRY
+from core.decide import proof_status  # single owner (evidence -> ledger status)
 
 def dom():
     """One DOM eval: step, visible text, field values, errors, buttons, url."""
@@ -34,14 +28,23 @@ tag = sys.argv[1] if len(sys.argv) > 1 else "v"
 st = dom()
 ctl({"op": "snap", "name": f"v_{tag}", "full": False})
 p = f"logs/v_{tag}.png"
-try:
-    ocr = subprocess.run(["tesseract", p, "-", "--psm", "6"], capture_output=True, text=True, timeout=10).stdout
-    ocr_snip = ocr.replace("\n", " | ")[:400]
-except Exception:
-    ocr_snip = "(ocr fail)"
+ocr_text = ocr(p)
+ocr_snip = ocr_text.replace("\n", " | ")[:400] if ocr_text else (
+    "(OCR unavailable — install tesseract; DOM state above is still valid)"
+    if not ocr_available() else "(no OCR text)")
 print("STEP:", st.get("step"), "| DLG:", st.get("dlg"), "| ERRORS:", st.get("errs"))
 print("URL:", st.get("url"))
 print("BTNS:", st.get("btns"))
 for v in st.get("vals", []):
     print(f"  {v['n']:26s} = {v['v']!r}")
 print("OCR:", ocr_snip)
+
+# Typed proof classification: hard_assert owns the POSITIVE patterns, decide owns
+# the evidence -> status mapping. No positive message read = blocked (never infer).
+found = ""
+for pat in POSITIVE:
+    m = re.search(pat, ocr_text, re.I)
+    if m:
+        found = m.group(0)
+        break
+print("STATUS:", proof_status(found))

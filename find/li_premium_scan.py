@@ -3,23 +3,24 @@
 Sectors: banking/fintech + distribution/supply-chain. Logged-in browser (:9000).
 Company-scoped via f_C=<id>&geoId=102713980 (Bengaluru). Usage: .venv/bin/python find/li_premium_scan.py
 """
-import json, socket, time, re
+import json
+import re
 
-HOST, PORT = "127.0.0.1", 9000
+from core.ctl import call_wait
+
 GEO_BLR = "102713980"
 
+
 def ctl(cmd, wait=0.0):
-    s = socket.create_connection((HOST, PORT), timeout=120)
-    s.sendall((json.dumps(cmd) + "\n").encode())
-    buf = b""
-    while not buf.endswith(b"\n"):
-        chunk = s.recv(65536)
-        if not chunk:
-            break
-        buf += chunk
-    s.close()
-    time.sleep(wait)
-    return json.loads(buf.decode() or "{}")
+    """Thin local shim over the ONE socket owner (core.ctl).
+
+    This file used to carry its own 9-line socket.create_connection loop, which is
+    exactly the duplication skills/REFERENCE.md#single-source-invariant forbids:
+    "Socket call has ONE owner: core.ctl.call / call_wait". The local name is kept
+    so the ~20 `ctl(...)` call sites below stay readable; the wire logic does not
+    live here any more.
+    """
+    return call_wait(cmd, wait=wait)
 
 def company_id(slug):
     ctl({"op": "navigate", "url": f"https://www.linkedin.com/company/{slug}/"}, 3.2)

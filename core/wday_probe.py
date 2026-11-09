@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """wday_probe.py — Workday availability probe (global outages happen; check BEFORE applying).
-Usage: .venv/bin/python core/wday_probe.py [domain tenant site]  (default: a placeholder tenant)"""
+Usage: .venv/bin/python core/wday_probe.py [domain tenant site]  (default: walmart/mckesson/visa)"""
 import json, sys, urllib.request
 
 def probe(domain, tenant, site, search="QA"):
@@ -19,7 +19,10 @@ def probe(domain, tenant, site, search="QA"):
         return f"DOWN ({str(e)[:40]})"
 
 DEFAULTS = [
-    ("example", "example.wd5.myworkdayjobs.com", "ExampleCorp", "External"),
+    ("walmart", "walmart.wd5.myworkdayjobs.com", "Walmart", "WalmartExternal"),
+    ("mckesson", "mckesson.wd5.myworkdayjobs.com", "McKesson", "McKessonExternal"),
+    ("visa", "visa.wd5.myworkdayjobs.com", "Visa", "Visa"),
+    ("warnerbros", "warnerbros.wd5.myworkdayjobs.com", "warnerbros", "global"),
 ]
 
 if __name__ == "__main__":

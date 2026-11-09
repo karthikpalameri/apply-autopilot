@@ -10,6 +10,7 @@ If config/user.json is missing, run `python3 setup.py` first.
 import json
 import os
 import sys
+from datetime import date
 
 _HUB = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _HUB not in sys.path:
@@ -46,6 +47,28 @@ def _full():
     return _CFG.get("full_name", "")
 
 
+def _notice_days():
+    """Live day-count to the last working day.
+
+    Derived, never stored: a numeric `notice_days` snapshot silently rots as the
+    date approaches. The DATE (`last_working_day`) is the source of truth; the
+    count follows it.
+
+    EXCEPTION: an explicit `notice_days_override` wins — the user may want a
+    different number shown to employers than the raw calendar gap. It is pinned
+    once here rather than retyped per form — one source, no drift.
+    """
+    override = _CFG.get("notice_days_override")
+    if override not in (None, ""):
+        return int(override)
+    lwd = _CFG.get("last_working_day", "")
+    try:
+        # LWD is the LAST day worked; notice ≠ 0 until you reach it.
+        return (date.fromisoformat(lwd) - date.today()).days + 1
+    except Exception:
+        return _CFG.get("notice_days", "0")
+
+
 A = {
     "full_name": _full(),
     "first": _full().split()[0] if _full() else "",
@@ -67,13 +90,12 @@ A = {
     "expected": _fmt_lpa(_CFG.get("expected_ctc_lpa", "")),
     "expected_ctc_lpa": _CFG.get("expected_ctc_lpa", ""),
     "expected_ctc": _CFG.get("expected_ctc", ""),
-    "notice": _CFG.get("notice_days", "0"),
+    "notice": _notice_days(),
     "availability": _CFG.get("availability", ""),
     "last_working_day": _CFG.get("last_working_day", ""),
     "years": _CFG.get("years_exp", ""),
     "linkedin": _CFG.get("linkedin_url", ""),
     "github": _CFG.get("github", ""),
-    "gender": _CFG.get("gender", "Female"),
     "summary": _CFG.get("summary", ""),
     "degree": _CFG.get("degree", ""),
     "discipline": _CFG.get("discipline", ""),

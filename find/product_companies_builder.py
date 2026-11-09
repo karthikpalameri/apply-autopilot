@@ -21,7 +21,7 @@ Usage:
   .venv/bin/python find/product_companies_builder.py --linkedin # + live LinkedIn verify
   .venv/bin/python find/product_companies_builder.py --count 500
 """
-import json, os, re, sys, socket, ssl, threading, urllib.request
+import json, os, re, sys, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 HUB = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -82,7 +82,6 @@ LINKEDIN_SLUGS = {
     "sahaj": "sahaj-software-automation",
     "replit india": "replit",
     "segment dev": "segment",
-    "segment twilio": "segment",
     "ghost": "the-ghost-foundation",
     "hangout by paytm": "hangout",
     "moj": "moj-app",
@@ -150,7 +149,7 @@ def build():
         webresults = list(ex.map(lambda e: check_website(e["website"]), raw))
 
     companies = []
-    for e, (real_url, ok) in zip(raw, webresults):
+    for e, (real_url, ok) in zip(raw, webresults, strict=False):
         url = real_url if ok else (e["website"] if e["website"] else "")
         companies.append({
             "company": e["company"],
@@ -172,7 +171,7 @@ SECTOR_BUCKET = {
     "fintech-saas": "Fintech / SaaS", "fintech-payments": "Fintech / Payments",
     "fintech-api": "Fintech / APIs", "fintech-analytics": "Fintech / Analytics",
     "fintech-admin": "Fintech / Admin", "banking": "Banking / Fintech",
-    "crypto": "Crypto / Fintech", "fintech-insurance": "Fintech / Insurance",
+    "crypto": "Crypto / Fintech",
     "health-saas": "HealthTech", "health": "HealthTech", "health-ai": "HealthTech",
     "healthtech": "HealthTech", "healthcare": "HealthTech",
     "saas": "SaaS", "b2b": "B2B / SaaS", "b2b-saas": "SaaS",

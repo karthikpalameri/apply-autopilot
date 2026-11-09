@@ -1,72 +1,64 @@
 #!/usr/bin/env python3
-"""listed_sweep.py — QA openings at PUBLICLY LISTED product companies (NASDAQ/NYSE/NSE, revenue-backed).
-Concurrent ATS API checks + fast timeouts. Usage: .venv/bin/python find/listed_sweep.py"""
-import json, urllib.request, re, sys
-from concurrent.futures import ThreadPoolExecutor
+"""listed_sweep.py — QA openings at PUBLICLY LISTED product companies.
 
+Board matrix and the concurrent scan live in **core/ats_boards.py** (single owner).
+This file keeps only the listed-company set (ticker-backed, revenue-verified) and
+merges it with any listed company already resolved in the 500-list.
 
-def _ctx():
-    try:
-        import certifi, ssl
-        return ssl.create_default_context(cafile=certifi.where())
-    except Exception:
-        return None
+Before: its own GH/LEV/ASH arrays, a fourth copy of the board matrix that drifted
+from find/prod_sweep.py. Usage: .venv/bin/python find/listed_sweep.py
+"""
+import contextlib
+import json
+import os
+import re
+import sys
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config.dedupe import ROLE_NOT as NON
+from config.dedupe import ROLE_QA as QA
+from core.ats_boards import scan
 
-def get(url, t=3):
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        return json.loads(urllib.request.urlopen(req, timeout=t, context=_ctx()).read())
-    except Exception:
-        return None
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA = os.path.join(ROOT, "config", "data", "product_companies.json")
 
-QA = re.compile(r"\b(qa|sdet|quality|test|automation)\b", re.I)
-NON = re.compile(r"\b(recruiter|trainer|sales|marketing|data scientist|scientist|security engineer|hr|talent|firmware|hardware|electrical|manufacturing|soc|silicon|verification|analyst - |tax|audit|credit)\b", re.I)
+# Listed product companies (ticker) -> ATS board. Curated; the 500-list adds the rest.
+LISTED = [
+    ("freshworks", "greenhouse"), ("snowflakecomputing", "greenhouse"), ("crowdstrike", "greenhouse"),
+    ("twilio", "greenhouse"), ("uber", "greenhouse"), ("datadoghq", "greenhouse"),
+    ("cloudflare", "greenhouse"), ("zscaler", "greenhouse"), ("n-able", "greenhouse"),
+    ("gitlab", "greenhouse"), ("servicenow", "greenhouse"), ("netskope", "greenhouse"),
+    ("cohesity", "greenhouse"), ("yugabyte", "greenhouse"), ("oracle", "greenhouse"),
+    ("adobe", "greenhouse"), ("atlassian", "greenhouse"), ("instructure", "greenhouse"),
+    ("swiggy", "lever"), ("zomato", "lever"), ("delhivery", "lever"), ("makemytrip", "lever"),
+    ("netapp", "lever"), ("cisco", "lever"), ("microsoft", "lever"), ("sap", "lever"),
+    ("paloaltonetworks", "ashby"), ("vercel", "ashby"),
+]
+
 LOC = re.compile(r"bangal|bengaluru|india", re.I)
 
-# Listed product cos (ticker) -> ATS board
-GH = ["freshworks","snowflakecomputing","crowdstrike","twilio","uber","datadoghq","cloudflare","zscaler",
-      "n-able","gitlab","servicenow","netskope","cohesity","yugabyte","oracle","adobe","atlassian","instructure"]
-LEV = ["swiggy","zomato","delhivery","makemytrip","netapp","cisco","microsoft","sap","adobe","service-now"]
-ASH = ["paloaltonetworks","zscaler","crowdstrike","servicenow","datadog","vercel"]
 
-found = []
+def companies():
+    out = [{"company": b, "ats_slug": b, "ats": p} for b, p in LISTED]
+    with contextlib.suppress(OSError, ValueError):   # missing/corrupt data file: listed set still works
+        for c in json.load(open(DATA)):
+            if (c.get("ats_slug") or "").strip():
+                out.append(c)
+    seen, uniq = set(), []
+    for c in out:
+        key = (c.get("ats"), c["ats_slug"])
+        if key not in seen:
+            seen.add(key)
+            uniq.append(c)
+    return uniq
 
-def gh_check(b):
-    d = get(f"https://boards-api.greenhouse.io/v1/boards/{b}/jobs")
-    out = []
-    if d and "jobs" in d:
-        for j in d["jobs"]:
-            t = j.get("title", ""); loc = (j.get("location") or {}).get("name", "")
-            if QA.search(t) and not NON.search(t) and LOC.search(loc):
-                out.append(("GH", b, j.get("id"), t[:42], loc[:22], j.get("absolute_url","")[:66]))
-    return out
 
-def lev_check(b):
-    d = get(f"https://api.lever.co/v0/postings/{b}?mode=json")
-    out = []
-    if isinstance(d, list):
-        for j in d:
-            t = j.get("text", ""); loc = j.get("categories", {}).get("location", "")
-            if QA.search(t) and not NON.search(t) and LOC.search(loc):
-                out.append(("LEV", b, j.get("id","")[:10], t[:42], loc[:22], j.get("hostedUrl","")[:66]))
-    return out
+def main():
+    found = scan(companies(), QA, NON, LOC)
+    print(f"QA OPENINGS @ LISTED PRODUCT COS: {len(found)}")
+    for company, prov, title, loc, url in sorted(found):
+        print(f"{prov[:4]:4s} {company[:18]:18s} {title[:42]:42s} | {loc[:20]:20s} | {url[-44:]}")
 
-def ash_check(b):
-    d = get(f"https://api.ashbyhq.com/posting-api/job-board/{b}")
-    out = []
-    if d and "jobs" in d:
-        for j in d["jobs"]:
-            t = j.get("title",""); loc = j.get("location") or ""
-            if QA.search(t) and not NON.search(t) and LOC.search(loc):
-                out.append(("ASH", b, "", t[:42], loc[:22], j.get("jobUrl","")[:66]))
-    return out
 
-with ThreadPoolExecutor(max_workers=12) as ex:
-    for fn, boards in ((gh_check, GH), (lev_check, LEV), (ash_check, ASH)):
-        for res in ex.map(fn, boards):
-            found.extend(res)
-
-print(f"QA OPENINGS @ LISTED PRODUCT COS: {len(found)}")
-for f in found:
-    print(f"{f[0]:4s} {f[1][:16]:16s} {f[3]:42s} | {f[4]:20s} | {f[5][-44:]}")
+if __name__ == "__main__":
+    main()

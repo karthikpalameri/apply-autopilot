@@ -27,6 +27,23 @@ def _setup(name="hub", level=logging.INFO):
 
 log = _setup()
 
+
+def say(msg="", level=logging.INFO):
+    """Console-facing status line that ALSO reaches logs/app.log.
+
+    Scripts used bare print() for progress and results, so nothing they did ever
+    landed in the log file — the only evidence of a real submission was a
+    screenshot. say() keeps the exact stdout formatting (so CLI tables and dry-run
+    plans look the same) while routing a timestamped copy to the rotating log.
+    """
+    print(msg)
+    log.log(level, "%s", msg)
+
+
+def warn(msg=""):
+    say(msg, level=logging.WARNING)
+
+
 def timeit(fn):
     """Decorator: log elapsed time (speed visibility)."""
     import time, functools

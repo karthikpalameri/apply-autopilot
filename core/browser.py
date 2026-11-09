@@ -35,7 +35,7 @@ class CtlBrowser(Browser):
 
     def navigate(self, url):
         self._rpc("navigate", url=url); time.sleep(2)
-        return self.snapshot() if False else True
+        return True
 
     def snapshot(self):
         r = self._rpc("eval", js="() => document.body ? document.body.innerText.slice(0,4000) : ''")
@@ -60,15 +60,21 @@ class McpBrowser(Browser):
         """Reuse the SAME MCP session across script runs (browser stays open + logged in)."""
         try:
             if os.path.exists(self._sidfile):
-                self.sid = json.load(open(self._sidfile)).get("sid")
-        except Exception:
+                with open(self._sidfile) as f:
+                    self.sid = json.load(f).get("sid")
+        except Exception as e:
+            log.warning("session file unreadable (%s) — starting a fresh session", e)
             self.sid = None
 
     def _save_sid(self):
         try:
-            json.dump({"sid": self.sid}, open(self._sidfile, "w"))
-        except Exception:
-            pass
+            # context manager matters: an unclosed handle can leave the file
+            # truncated, and losing this sid means a relaunch + a fresh login.
+            with open(self._sidfile, "w") as f:
+                json.dump({"sid": self.sid}, f)
+        except Exception as e:
+            # A silent failure here forces a relaunch + loses login state next run.
+            log.error("could not persist session id to %s: %s", self._sidfile, e)
 
     def _rpc(self, method, params, _id=1):
         import urllib.error
@@ -76,8 +82,11 @@ class McpBrowser(Browser):
             try:
                 return self._do_rpc(method, params, _id)
             except urllib.error.HTTPError as e:
-                if e.code == 400 and attempt == 0:
-                    # stale session — re-init fresh, persist new sid
+                if e.code in (400, 404) and attempt == 0:
+                    # Stale session id. After a server restart the server answers
+                    # 404, not 400 — handling only 400 meant a dead browser
+                    # abstraction until someone deleted config/mcp_session.json.
+                    log.warning("MCP session rejected (HTTP %s) — re-initialising", e.code)
                     self.sid = None
                     self._do_rpc("initialize", {"protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {"name": "hub", "version": "1"}})
                     self._save_sid()
@@ -91,8 +100,14 @@ class McpBrowser(Browser):
         req = urllib.request.Request(self.url, body, h)
         resp = urllib.request.urlopen(req, timeout=120)
         if "Mcp-Session-Id" in resp.headers:
-            self.sid = resp.headers["Mcp-Session-Id"]
-            self._save_sid()
+            # The server echoes the same session id on EVERY response. Writing the
+            # file each time cost a json.dump + open/close (~0.4 ms) on every single
+            # UI call - measured 10 writes for 10 calls - and bumped the file mtime
+            # for no reason. Only persist when the value actually changes.
+            sid = resp.headers["Mcp-Session-Id"]
+            if sid != self.sid:
+                self.sid = sid
+                self._save_sid()
         raw = resp.read().decode()
         try:
             return json.loads(raw)
@@ -101,19 +116,6 @@ class McpBrowser(Browser):
                 if line.startswith("data: "):
                     return json.loads(line[6:])
             return {"raw": raw[:200]}
-
-    def eval_js(self, js):
-        """Evaluate JS in the reused browser (DOM queries beyond the a11y snapshot)."""
-        r = self._call("browser_evaluate", {"function": js})
-        content = (r.get("result") or {}).get("content") or []
-        txt = "".join(c.get("text", "") for c in content if isinstance(c, dict))
-        # strip the '### Error' wrapper when present
-        if txt.startswith("### Error"):
-            return {"error": txt}
-        try:
-            return {"result": json.loads(txt)} if txt.startswith(("{", "[", '"')) else {"result": txt}
-        except Exception:
-            return {"result": txt}
 
     def _call(self, tool, args):
         return self._rpc("tools/call", {"name": tool, "arguments": args})
@@ -179,16 +181,40 @@ class McpBrowser(Browser):
             return {"text": "\n".join(c.get("text", "") for c in res["content"])}
         return {"text": str(res)[:4000]}
 
+    @staticmethod
+    def _unwrap(txt):
+        """Strip Playwright MCP's envelope from an evaluate result.
+
+        The tool returns:
+            ### Result
+            false
+            ### Ran Playwright code
+            ```js
+            await page.evaluate('() => document.body.innerText.includes("foo")');
+            ```
+        The echoed code contains whatever string the caller searched for, so any
+        `if "foo" in str(result)` check is ALWAYS true, and `str(result) == "404"`
+        is never true. Both bugs were live. Return only the Result value.
+        """
+        m = re.search(r"### Result\n(.*?)(?:\n### |\Z)", txt, re.S)
+        value = (m.group(1) if m else txt).strip()
+        try:
+            return json.loads(value)
+        except Exception:
+            return value.strip('"')
+
     def eval_js(self, js):
+        """Evaluate JS in the reused browser; returns the unwrapped value.
+
+        Matches CtlBrowser.eval_js, which has always returned the raw value — the
+        two implementations used to disagree on their return shape too.
+        """
         r = self._call("browser_evaluate", {"function": js})
         content = (r.get("result") or {}).get("content") or []
         txt = "".join(c.get("text", "") for c in content if isinstance(c, dict))
         if txt.startswith("### Error"):
             return {"error": txt}
-        try:
-            return {"result": json.loads(txt)} if txt.startswith(("{", "[", '"')) else {"result": txt}
-        except Exception:
-            return {"result": txt}
+        return self._unwrap(txt)
 
     def click(self, ref):
         r = self._call("browser_click", {"target": ref})

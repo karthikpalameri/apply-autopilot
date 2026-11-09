@@ -26,24 +26,17 @@ HUB = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, HUB)
 
 try:
-    from config.answers import RESUME as _RESUME_CFG, RESUME_NAME as _RESUME_NAME
-    RESUME = os.path.abspath(os.path.expanduser(_RESUME_CFG or ""))
+    from config.answers import A as _A
+    RESUME = os.path.abspath(os.path.expanduser(_A.get("resume", "")))
 except Exception:
     RESUME = ""
 
 MDPATH = os.path.join(HUB, "config", "resume.md5")
 # The ATS/UPLOAD copy MUST keep the PROFESSIONAL filename (recruiters reject "resume.pdf").
 # Browser can't always read ~/Downloads, so we copy the canonical into config with the
-# EXACT intended filename (e.g. Firstname_Lastname_Role.pdf, from config/user.json) and
-# update that if the source changes.
-
-def _upload_name():
-    name = (_RESUME_NAME or "").strip() or "Firstname_Lastname_Role.pdf"
-    if not name.lower().endswith(".pdf"):
-        name += ".pdf"
-    return name
-
-UPLOAD_NAME = _upload_name()
+# EXACT intended filename (the basename of resume_path in config/user.json) and update
+# that if the source changes.
+UPLOAD_NAME = os.path.basename(RESUME) if RESUME else "resume.pdf"
 HUB_COPY = os.path.join(HUB, "config", UPLOAD_NAME)
 
 

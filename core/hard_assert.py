@@ -2,7 +2,7 @@
 
 Usage:
     from core.hard_assert import assert_applied
-    proof = assert_applied(b, "ExampleCo")   # raises AssertionError if no positive msg
+    proof = assert_applied(b, "Karix")   # raises AssertionError if no positive msg
 
 Positive patterns (per ATS):
     LinkedIn EA:  "Your application was sent to <Co>", "Applied tab of My Jobs"
@@ -11,13 +11,18 @@ Positive patterns (per ATS):
     Workday:      "/jobTasks/completed/application", "Application Submitted"
     Generic:      "application has been received", "application was submitted"
 """
-import sys, os, re, time, json
+import glob, os, re, sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.ocr import available as ocr_available, read as ocr  # single owner (tesseract)
+from core.ui import until                                  # single owner (polling)
 
 POSITIVE = [
     r"Your application was sent to",
     r"Your application was successfully submitted",
     r"Applied tab of My Jobs",
     r"Thank you for applying",
+    r"Thank you for your application",
     r"Thank you for your interest",
     r"We have successfully received",
     r"application (has been|was) (received|submitted)",
@@ -25,17 +30,20 @@ POSITIVE = [
     r"/jobTasks/completed/application",
 ]
 
-def ocr_text(b, shot=None):
-    """Screenshot + tesseract = the ground truth."""
+def ocr_text(b):
+    """Screenshot + OCR = the ground truth for "did the confirmation really render"."""
+    if not ocr_available():
+        print("[HARD-ASSERT] OCR unavailable (install tesseract); using DOM confirmation")
+        return ""
     b._call("browser_take_screenshot", {})
-    time.sleep(2)
-    import glob
+    # the screenshot lands on disk asynchronously; poll instead of a blind 2s
+    shots = sorted(glob.glob(".playwright-mcp/*.png"), key=os.path.getmtime)
+    until(lambda: sorted(glob.glob(".playwright-mcp/*.png"), key=os.path.getmtime) != shots,
+          timeout=5, interval=0.2, what="screenshot file")
     shots = sorted(glob.glob(".playwright-mcp/*.png"), key=os.path.getmtime)
     if not shots:
         return ""
-    import subprocess
-    r = subprocess.run(["tesseract", shots[-1], "-"], capture_output=True, text=True)
-    return r.stdout
+    return ocr(shots[-1])
 
 def assert_applied(b, company, read_dom=True):
     """HARD ASSERT: read the page (DOM + OCR) → must find the positive message.

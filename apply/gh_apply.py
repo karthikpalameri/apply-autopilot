@@ -18,8 +18,8 @@ import json, os, re, sys, time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.logger import log, timeit
-from core.captcha_guard import page_has_captcha
+from core.logger import log, timeit, say
+from core.ui import check, fill, select, upload, until
 from config.answers import A, RESUME
 
 
@@ -87,18 +87,7 @@ def map_answer(question):
 # ---------------------------------------------------------------------------
 # Browser bridge (:9000 ctl) — same primitives as fill_gh_fast.py
 # ---------------------------------------------------------------------------
-def _ctl(cmd, timeout=60):
-    import socket
-    s = socket.create_connection(("127.0.0.1", 9000), timeout=timeout)
-    s.sendall((json.dumps(cmd) + "\n").encode())
-    buf = b""
-    while not buf.endswith(b"\n"):
-        c = s.recv(65536)
-        if not c:
-            break
-        buf += c
-    s.close()
-    return json.loads(buf.decode())
+from core.ctl import call as _ctl  # single owner (:9000 socket) — DRY
 
 
 def _ev(js):
@@ -106,7 +95,7 @@ def _ev(js):
 
 
 def _fill_text(fid, v):
-    return _ctl({"op": "hfill", "by": "selector", "key": f"#{fid}", "value": v}).get("ok")
+    return fill(f"#{fid}", v)
 
 
 # ---------------------------------------------------------------------------
@@ -114,10 +103,10 @@ def _fill_text(fid, v):
 # ---------------------------------------------------------------------------
 def plan(board, jobid, url):
     d = fetch_questions(board, jobid)
-    print(f"GREENHOUSE APPLY — dry-run plan (nothing submitted)")
-    print(f"  job:    {d.get('title')} @ {d.get('company_name') or board}")
-    print(f"  loc:    {(d.get('location') or {}).get('name')}")
-    print(f"  url:    {url}\n")
+    say("GREENHOUSE APPLY — dry-run plan (nothing submitted)")
+    say(f"  job:    {d.get('title')} @ {d.get('company_name') or board}")
+    say(f"  loc:    {(d.get('location') or {}).get('name')}")
+    say(f"  url:    {url}\n")
 
     plan_ = {"fields": [], "resume": None, "unknown_required": []}
     for q in d.get("questions", []):
@@ -126,18 +115,18 @@ def plan(board, jobid, url):
         kind, val = map_answer(q)
         if kind == "resume":
             plan_["resume"] = val
-            print(f"  📎 resume   -> {os.path.basename(val)}")
+            say(f"  📎 resume   -> {os.path.basename(val)}")
         elif kind:
             if kind == "text" and not val:
                 continue  # empty optional (e.g. no github set)
             plan_["fields"].append((label, kind, val, required))
             flag = "REQUIRED" if required else "optional"
-            print(f"  ✍️  {label[:44]:46s} -> {kind}:{val}  [{flag}]")
+            say(f"  ✍️  {label[:44]:46s} -> {kind}:{val}  [{flag}]")
         elif required:
             plan_["unknown_required"].append(label)
-            print(f"  ⚠️  {label[:44]:46s} -> UNKNOWN (must answer manually)  [REQUIRED]")
+            say(f"  ⚠️  {label[:44]:46s} -> UNKNOWN (must answer manually)  [REQUIRED]")
         else:
-            print(f"  –   {label[:44]:46s} -> skip (optional, no mapping)")
+            say(f"  –   {label[:44]:46s} -> skip (optional, no mapping)")
     return plan_
 
 
@@ -145,9 +134,11 @@ def apply(board, jobid, url):
     from core.resume_secure import PICK, BEFORE_UPLOAD, POST
 
     PICK()  # resume MD5 gate (before opening the form)
-    print(f"🚀 {url}")
+    say(f"🚀 {url}")
     _ctl({"op": "navigate", "url": url})
-    time.sleep(4)
+    # wait for the application form instead of a flat 4s
+    until(lambda: _ev("() => !!document.getElementById('application-form')"),
+          timeout=15, interval=0.4, what="greenhouse form")
 
     d = fetch_questions(board, jobid)
     for q in d.get("questions", []):
@@ -161,44 +152,48 @@ def apply(board, jobid, url):
         fid = re.sub(r"[^a-z0-9_]+", "_", label.strip().lower()).strip("_")
         if kind == "text":
             _fill_text(fid, val)
-            print(f"✍️  {label} = {val}")
+            say(f"✍️  {label} = {val}")
         elif kind == "select":
-            _ev(f"() => {{ const b=[...document.querySelectorAll('select, input[type=radio]')]"
-                f".filter(x=>x.offsetParent); const opt=[...document.querySelectorAll('option')]"
-                f".find(o=>o.textContent.trim().toLowerCase().includes('{str(val).lower()}'))"
-                f"|| [...document.querySelectorAll('input[type=radio]')].find(r=>r.value.toLowerCase()==='{str(val).lower()}');"
-                f" if(opt){{opt.selected=true; opt.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}} return 'none'; }}")
-            print(f"🔘 {label} = {val}")
+            # Was one JS string that searched every <option> on the page and, on the
+            # radio fallback, set `opt.selected` — a property radios do not have, so
+            # that branch could never have worked. Try the native select first, then
+            # the radio, using the idempotent primitives.
+            chosen = select(f"#{fid}", val)
+            if chosen:
+                say(f"🔘 {label} = {val}  -> {chosen}")
+            elif check(f"#{fid}"):
+                say(f"🔘 {label} = {val}  (radio)")
+            else:
+                log.warning("could not answer %r with %r (no #%s select or radio)",
+                            label, val, fid)
         time.sleep(0.2)
 
     # resume upload through the MD5 gate
     path = BEFORE_UPLOAD()
-    _ctl({"op": "upload_cdp", "path": path})
-    print("📎 resume uploaded (md5 gate ✓)")
+    n = upload(None, path)          # no selector -> first file input, same as before
+    say(f"📎 resume uploaded (md5 gate ✓, {n} file)")
     POST()
-    time.sleep(2)
+    until(lambda: _ev("() => !document.body.innerText.includes('Attach') ? true : "
+                      "document.querySelectorAll('[class*=file]').length > 0"),
+          timeout=10, interval=0.3, what="resume upload")
 
     # required-empty check
     errs = _ev("() => [...document.querySelectorAll('*')].filter(e=>e.children.length===0&&e.offsetParent&&/this field is required/i.test((e.innerText||''))).length")
-    print("required-empty:", errs)
+    say("required-empty:", errs)
     if int(errs or 0) > 0:
-        print("STILL MISSING REQUIRED — manual fix needed")
+        say("STILL MISSING REQUIRED — manual fix needed")
         sys.exit(2)
 
-    if page_has_captcha(_ev):
-        print("CAPTCHA detected — refusing automated submit. Leaving the headed page open for you.")
-        return False
-
     _ev("() => { const b=[...document.querySelectorAll('button, input[type=submit]')].find(x=>x.offsetParent&&/submit/i.test((x.innerText||x.value||'').trim())); if(b){ b.click(); return 'clicked'; } return 'no'; }")
-    time.sleep(8)
+    until(lambda: _ev("() => { const f=document.getElementById('application-form'); "
+                      "const t=document.body.innerText; return !f || "
+                      "/thank you for your application|application has been submitted|your application was/i.test(t); }"),
+          timeout=20, interval=0.4, what="submit confirmation")
     st = _ev("() => { const f=document.getElementById('application-form'); const t=document.body.innerText.replace(/\\s+/g,' '); return JSON.stringify({formGone:!f, thanks:/thank you for your application|application has been submitted|your application was/i.test(t)}); }")
-    print("AFTER SUBMIT:", st)
+    say("AFTER SUBMIT:", st)
 
 
 def main():
-    from core.console import enable_utf8
-    enable_utf8()
-
     args = sys.argv[1:]
     if not args:
         raise SystemExit(__doc__)
@@ -208,7 +203,7 @@ def main():
         apply(board, jobid, url)
     else:
         plan(board, jobid, url)
-        print("\nTo actually submit: start the stack (`./run.sh`), then re-run with --submit.")
+        say("\nTo actually submit: start the stack (`./run.sh`), then re-run with --submit.")
 
 
 if __name__ == "__main__":

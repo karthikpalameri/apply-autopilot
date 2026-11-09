@@ -3,14 +3,15 @@
 Reads latest inbox rows + opens an email to extract OTP/verification codes.
 Gmail is always read in one reusable Gmail tab, then the application tab is restored.
 Usage: python3 core/gmail_read.py [--code] [--subject KEYWORD]"""
-import sys, os, json, time, re
+import sys, os, time, re
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.ui import text
 from core.browser import McpBrowser
+from core.decide import extract_code  # typed code extraction (owns gmail_otp regex)
 
 b = McpBrowser()
 GMAIL_INBOX = "https://mail.google.com/mail/u/0/#inbox"
 
-def snap(): return b.snapshot().get("text","")
 
 def _activate_gmail():
     """Select the one reusable Gmail tab and return the tab to restore."""
@@ -26,7 +27,7 @@ def read_inbox():
     route = _activate_gmail()
     try:
         b.navigate(GMAIL_INBOX); time.sleep(6)
-        t = snap()
+        t = text(b)
         rows = re.findall(r'row "([^"]{5,400})" \[ref=(\w+)\]', t)
         return rows, t
     finally:
@@ -37,9 +38,9 @@ def open_email(row_ref):
     try:
         b._call("browser_click", {"target": row_ref})
         time.sleep(4)
-        t = snap()
-        # extract the message body + codes
-        codes = re.findall(r'\b(\d{6,8})\b', t)
+        t = text(b)
+        # extract the message body + codes (typed; catches Greenhouse 8-char AND 6-8 digit OTP)
+        codes = [c.value for c in extract_code(t)]
         return t, codes
     finally:
         _restore_form(route)
@@ -54,7 +55,7 @@ if __name__ == "__main__":
         dump_path = sys.argv[i+1] if len(sys.argv) > i+1 else os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logs", "gmail_inbox.txt")
         os.makedirs(os.path.dirname(dump_path), exist_ok=True)
         with open(dump_path, "w") as fh:
-            for label, ref in rows:
+            for label, _ref in rows:
                 fh.write(label + "\n")
         print(f"📤 dumped {len(rows)} inbox rows -> {dump_path}")
     for i, (label, ref) in enumerate(rows[:10]):

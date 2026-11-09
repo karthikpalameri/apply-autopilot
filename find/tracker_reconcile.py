@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """find/tracker_reconcile.py — APPLIED vs NOT-APPLIED tracker.
 
-Reconciles two sources and writes an authoritative report to this folder:
-  1. config/progress.json  (every application we recorded — the ground truth of what was attempted)
-  2. Gmail inbox confirmations (via core/gmail_read.py --dump → logs/gmail_inbox.txt)
+Reconciles three sources and writes an authoritative report to this folder:
+  1. data/applied_ledger.jsonl  (append-only ledger — THE AUTHORITY for "did we apply?")
+  2. config/progress.json       (human-readable projection, incl. pending_attempts)
+  3. Gmail inbox confirmations  (via core/gmail_read.py --dump → logs/gmail_inbox.txt)
 
 Output:
   - config/applied_vs_not_applied.md   (README-friendly, in-hub)
   - scratch/APPLIED.md                 (caveman dedupe tracker — kept in sync)
 
 Two run modes:
-  .venv/bin/python find/tracker_reconcile.py          # progress.json only (fast, no browser)
+  .venv/bin/python find/tracker_reconcile.py          # ledger + progress.json (fast, no browser)
   .venv/bin/python find/tracker_reconcile.py --gmail  # + read inbox confirmations (needs CloakBrowser)
 """
-import json, os, re, sys, datetime, collections
+import os, re, sys, datetime, collections
 
 HUB = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROG = os.path.join(HUB, "config", "progress.json")
@@ -21,18 +22,22 @@ OUT = os.path.join(HUB, "config", "applied_vs_not_applied.md")
 APPLIED_MD = os.path.join(HUB, "scratch", "APPLIED.md")
 INBOX_TXT = os.path.join(HUB, "logs", "gmail_inbox.txt")
 
-APPLIED_STATUS = {"submitted", "submitted-awaiting-email", "submitted-awaiting-employer-confirmation",
-                  "applied", "done", "verified", "email-sent", "sent-by-user",
-                  "confirmed-email", "confirmed-ats", "confirmed-linkedin", "email-verified",
-                  "email-confirmed", "submitted-email", "submitted-confirmed", "duplicate-submitted"}
+sys.path.insert(0, HUB)
+from config.dedupe import APPLIED_STATUSES  # noqa: E402
+from core import progress  # noqa: E402
+# Module-level on purpose. These used to be imported INSIDE add() under a bare
+# `except Exception: identity = None`, which silently degraded dedupe to URL-only
+# whenever `core` was not yet importable (sys.path.insert ran further down the
+# file). That inflated the collector with 339 phantom duplicate records and
+# over-reported "applied" 240 vs the true 234. A failed import must be loud.
+from core.applied_ledger import co_key, role_key, iter_rows  # noqa: E402
+
+APPLIED_STATUS = APPLIED_STATUSES  # single owner: config/dedupe.py (was a private copy)
 
 
 def load_progress():
-    try:
-        return json.load(open(PROG))
-    except Exception as e:
-        print(f"❌ cannot read {PROG}: {e}")
-        sys.exit(1)
+    # single owner: core/progress.py (strict = exit, this script's original behaviour)
+    return progress.load(strict=True)
 
 
 def company_of(v):
@@ -57,7 +62,14 @@ def collect_applications(d):
         co = company_of(item) or fallback_company
         if not co:
             return
-        identity = item.get("record_id") or item.get("url") or (src, index)
+        # Identity: prefer a stable (company, role) key. The same attempt is often
+        # recorded twice — once in progress.json, once in the ledger, each with a
+        # different portal URL — so URL/record_id alone produces phantom duplicates
+        # (286 of them). Fall back to URL only when the role is unknown.
+        _role = item.get("role") or item.get("title") or ""
+        identity = ("cr", co_key(co), role_key(_role)) if _role else None
+        if not identity:
+            identity = item.get("record_id") or item.get("url") or (src, index)
         if identity in seen:
             return
         seen.add(identity)
@@ -76,6 +88,16 @@ def collect_applications(d):
     # Current canonical format.
     for index, item in enumerate(d.get("verified_applications", [])):
         add(item, "verified_applications", index)
+
+    # Pending attempts (blocked / in-progress / awaiting-email) are REAL attempts and
+    # must appear in APPLIED.md — a blocked role is still a duplicate. Omitting them is
+    # what let Bidgely SDET 3 be re-filled after a 2026-10-27 block.
+    for index, item in enumerate(d.get("pending_attempts", [])):
+        add(item, "pending_attempts", index)
+
+    # Append-only ledger — the authority. Catches history destroyed by schema rewrites.
+    for index, item in enumerate(iter_rows()):
+        add(item, "ledger", index)
 
     # Legacy session-confirmed product lists.
     for k, v in d.items():
@@ -223,6 +245,26 @@ def write_scratch_applied_md(recs):
     lines = ["# APPLIED (dedupe source — auto-refreshed by tracker_reconcile.py)",
              f"# {datetime.date.today().isoformat()}", "# nothing below should be re-applied", ""]
     submitted = sorted((r for r in recs if applied(r)),
+                       key=lambda r: (str(r.get("company", "")).lower(),
+                                      str(r.get("title", "")).lower(),
+                                      str(r.get("date", ""))))
+    # One line per real application. The same attempt arrives from progress.json,
+    # pending_attempts AND the ledger (each with a different portal URL), so key on
+    # (company-key, role-key) and keep the best-evidenced row.
+    from core.applied_ledger import co_key, role_key
+
+    best = {}
+    for r in submitted:
+        k = (co_key(r.get("company", "")), role_key(r.get("title", "")))
+        prev = best.get(k)
+        if prev is None:
+            best[k] = r
+            continue
+        # Prefer email-verified, then a row that carries a record_id/proof.
+        score = lambda x: (is_email_verified(x), bool(x.get("record_id")), len(str(x.get("proof") or "")))
+        if score(r) > score(prev):
+            best[k] = r
+    submitted = sorted(best.values(),
                        key=lambda r: (str(r.get("company", "")).lower(),
                                       str(r.get("title", "")).lower(),
                                       str(r.get("date", ""))))

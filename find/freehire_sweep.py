@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.logger import log, timeit
 from core.freehire_client import FreehireClient, FreehireError
+from core import applied_ledger as _ledger
 from config.freehire import (
     QA, NON, ROUTING, UNKNOWN_ROUTE,
     GATE_COMPANY_TYPES, FRESH_CLASSES,
@@ -26,46 +27,32 @@ from config.freehire import (
 
 
 # ---------------------------------------------------------------------------
-# Dedupe — same rule as skills/find/SKILL.md (company + role already applied)
+# Dedupe — DELEGATED to core/applied_ledger.py (single source, append-only).
+# Matching rules (company suffixes, SDET synonyms, rename tolerance) live ONLY there;
+# duplicating them here is how the two copies drift apart.
 # ---------------------------------------------------------------------------
 def _norm(s):
     return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
 
 
 def load_applied():
-    """Return (applied_pairs, applied_companies) from the repo's dedupe sources."""
-    pairs, companies = set(), set()
-    base = os.path.dirname(os.path.abspath(__file__))
+    """Return (applied_pairs, applied_companies) from core/applied_ledger (the authority).
 
-    pj = os.path.join(base, "..", "config", "progress.json")
-    if os.path.exists(pj):
-        try:
-            d = json.load(open(pj))
-            for v in d.get("verified_applications", []):
-                c, r = _norm(v.get("company")), _norm(v.get("role"))
-                if c:
-                    companies.add(c)
-                    if r:
-                        pairs.add((c, r))
-        except Exception as e:
-            log.warning("freehire_sweep: progress.json unreadable: %s", e)
+    FAIL CLOSED: if the ledger is empty, stop and tell the operator to build it.
+    A silent fallback to progress.json would reintroduce exactly the bug that lost
+    ~111 companies (2026-11 schema rewrite) — never degrade to a weaker source.
+    """
+    from core.applied_ledger import pairs, companies, stats
 
-    am = os.path.join(base, "..", "scratch", "APPLIED.md")
-    if os.path.exists(am):
-        try:
-            for line in open(am):
-                if not line.startswith("- [x]"):
-                    continue
-                body = re.sub(r"\s*\[[^\]]*\]\s*$", "", line).strip("- [x] ")
-                body = body.split("(")[0]
-                if "—" in body:
-                    company, role = body.split("—", 1)
-                    c = _norm(company)
-                    companies.add(c)
-                    pairs.add((c, _norm(role)))
-        except Exception as e:
-            log.warning("freehire_sweep: APPLIED.md unreadable: %s", e)
-    return pairs, companies
+    p, c = pairs(), companies()
+    if not p:
+        raise SystemExit(
+            "❌ applied ledger is empty — refusing to sweep blind.\n"
+            "   Build it:  .venv/bin/python find/ledger_backfill_git.py\n"
+            "   Then:      .venv/bin/python find/ledger_backfill_git.py --current"
+        )
+    log.info("freehire_sweep: dedupe from ledger %s", stats())
+    return p, c
 
 
 # ---------------------------------------------------------------------------
@@ -96,6 +83,11 @@ def route_for(source):
 # ---------------------------------------------------------------------------
 # Discovery — orchestration (logs every decision)
 # ---------------------------------------------------------------------------
+PAGES = 12          # 12 x 100 = 1,200 postings; catalogue has ~5,400 India QA
+PAGE_DEADLINE = 20.0
+STALE_STREAK = 40   # sorted newest-first, so this many stale in a row means "we are past the fresh window"
+
+
 @timeit
 def discover(location, show_all=False, strict=False):
     client = FreehireClient()
@@ -104,7 +96,7 @@ def discover(location, show_all=False, strict=False):
     merged, seen = [], set()
     for label, params in build_search_params(location):
         try:
-            jobs = client.search(params)
+            jobs = client.search_paged(params, pages=PAGES, deadline=PAGE_DEADLINE)
         except FreehireError as e:
             log.error("freehire_sweep %s failed: %s", label, e)
             print(f"⚠️  {label} failed: {e}", file=sys.stderr)
@@ -118,7 +110,7 @@ def discover(location, show_all=False, strict=False):
     merged.sort(key=lambda j: j.get("posted_at", ""), reverse=True)
     log.info("freehire_sweep %s: fetched %d unique postings", location, len(merged))
 
-    results = []
+    results, stale_streak = [], 0
     for j in merged:
         title = j.get("title", "")
         company = j.get("company", "")
@@ -127,7 +119,11 @@ def discover(location, show_all=False, strict=False):
         age = (j.get("reality") or {}).get("age_days", "?")
         c, r = _norm(company), _norm(title)
 
-        if (c, r) in pairs:
+        # Delegate to the ledger — its matcher is the single source of truth
+        # (company suffix tolerance, SDET synonyms, rename handling, 75% token overlap).
+        dup = (c, r) in pairs or _ledger.is_applied(company, title)
+
+        if dup:
             log.info("DUPLICATE %s @ %s", title, company)
             results.append({"verdict": "duplicate", "job": j})
             continue
@@ -135,8 +131,16 @@ def discover(location, show_all=False, strict=False):
         ok, why = passes_gate(j, strict=strict)
         company_seen = c in companies
         if not show_all and not ok:
+            # Newest-first ordering makes staleness monotonic, so a long stale run
+            # means the fresh window is over: stop instead of walking 1,200 rows.
+            stale_streak = stale_streak + 1 if why == "stale" else 0
+            if stale_streak >= STALE_STREAK:
+                log.info("freehire_sweep: %d stale in a row — fresh window ended, stopping",
+                         stale_streak)
+                break
             log.debug("skip (%s) %s @ %s [%s %s %sd]", why, title, company, ctype, reality, age)
             continue
+        stale_streak = 0
 
         results.append({
             "verdict": "pass" if ok else f"fail:{why}",
@@ -184,9 +188,6 @@ def _render_human(results, scope, strict):
 
 
 def main():
-    from core.console import enable_utf8
-    enable_utf8()
-
     args = [a for a in sys.argv[1:]]
     location = "india" if "india" in args else "bangalore"
     show_all = "--all" in args

@@ -5,16 +5,17 @@ On Windows the default console codec is often `cp1252`, which raises
 (e.g. "✅", "⚠️", "→"). Call `enable_utf8()` once at the start of any entry point
 that prints non-ASCII so the same code runs cleanly on macOS / Linux / Windows.
 """
+import contextlib
 import sys
 
 
 def enable_utf8():
     """Reconfigure stdout/stderr to UTF-8 with replacement (never raises)."""
     for stream in (sys.stdout, sys.stderr):
-        try:
-            stream.reconfigure(encoding="utf-8", errors="replace")
-        except Exception:
-            pass
+        with contextlib.suppress(Exception):
+            reconfigure = getattr(stream, "reconfigure", None)
+            if reconfigure is not None:
+                reconfigure(encoding="utf-8", errors="replace")
 
 
 def propagate_utf8_env():

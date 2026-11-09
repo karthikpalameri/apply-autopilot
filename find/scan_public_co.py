@@ -1,19 +1,11 @@
 #!/usr/bin/env python3
 """scan_public_co.py <name> <companyId> — QA/SDET roles at one public co (live LinkedIn session)."""
-import json, socket, sys, time
+import json, os, sys
 
-def ctl(cmd, wait=0.0):
-    s = socket.create_connection(("127.0.0.1", 9000), timeout=60)
-    s.sendall((json.dumps(cmd) + "\n").encode())
-    buf = b""
-    while not buf.endswith(b"\n"):
-        c = s.recv(65536)
-        if not c:
-            break
-        buf += c
-    s.close()
-    time.sleep(wait)
-    return json.loads(buf.decode() or "{}")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.ctl import call_wait
+
+ctl = call_wait  # shared wrapper: call() + settle delay (core.ctl)
 
 name = sys.argv[1]
 cid = sys.argv[2]
