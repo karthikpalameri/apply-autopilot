@@ -13,6 +13,7 @@ config/user.json              # name, email, phone, CTC, credentials
 config/profile.json           # grilled profile (skills, achievements, answers)
 config/profile.md             # human-readable profile
 config/resume.md5             # your resume hash
+config/resume_facts.json      # derived resume scrape (DOB, phone, email) — regenerated
 config/cover_letter.txt
 config/sitekey.txt
 config/mcp_session.json
@@ -33,6 +34,7 @@ config/product_companies_tracker.md
 config/li_*.json
 config/targets.json
 scratch/
+data/                         # personal application ledger (applied_ledger.jsonl + highwater)
 
 # ---------------------------------------------------------------------------
 # 3. Environment & secrets
@@ -49,6 +51,7 @@ runtime/*
 !runtime/server.py            # the ctl bridge is tracked; everything else is local
 runtime/pids/
 runtime/mcp-session/
+runtime/py-session/
 runtime/session/
 runtime/lseg-mcp-probe/
 runtime/*.json

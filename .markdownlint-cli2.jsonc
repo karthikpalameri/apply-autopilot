@@ -1,0 +1,40 @@
+{
+  // markdownlint config — signal only, no cosmetics.
+  //
+  // Run: npx markdownlint-cli2 "docs/*.md" "skills/**/*.md" "*.md"
+  //
+  // A first unfiltered run reported 3243 findings. Breaking that down showed
+  // almost all of it is formatting preference, not document defects:
+  //
+  //   MD013 line-length        1039  <- these are agent instructions; one rule per
+  //                                    line is deliberate, wrapping them would make
+  //                                    them harder to read and to diff
+  //   MD060 table-column-style  558  <- alignment/padding cosmetics
+  //   MD055 table-pipe-style    502  <- leading/trailing pipe cosmetics
+  //   MD056 table-column-count  483  <- mostly FALSE POSITIVES: a list line such as
+  //                                    "Statuses: a | b | c" is not a table row
+  //   MD022/MD032/MD031/MD058   587  <- blank lines around headings, lists, fences
+  //   MD033 no-inline-html       30  <- <br> inside tables is used on purpose
+  //
+  // What IS kept is the small set that catches an actually broken document:
+  // heading structure, fenced code without a language, bare URLs that will not
+  // link, trailing spaces, missing final newline.
+  //
+  // docs/QUALITY.md §4 records the same reasoning for pyproject.toml (ruff):
+  // a gate nobody can pass is a gate everybody ignores.
+  "config": {
+    "MD013": false,
+    "MD060": false,
+    "MD055": false,
+    "MD056": false,
+    "MD022": false,
+    "MD032": false,
+    "MD031": false,
+    "MD058": false,
+    "MD033": false,
+    "MD036": false,
+    "MD041": false
+  },
+  "globs": ["docs/*.md", "skills/**/*.md", "*.md"],
+  "ignores": ["third_party/**", "archive/**", "temp/**", "node_modules/**", ".venv/**"]
+}

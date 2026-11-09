@@ -1,0 +1,24 @@
+{
+  "format": ["python"],
+  "reporters": ["ai"],
+  "minTokens": 50,
+  "ignore": [
+    "**/.venv/**",
+    "**/third_party/**",
+    "**/.git/**",
+    "**/temp/**",
+    "**/scratch/**",
+    "**/archive/**",
+    "**/runtime/extensions/**"
+  ],
+  "boundaries": [
+    {
+      "name": "socket-call-single-owner",
+      "code": ["core/ctl.py#call"],
+      "notIn": ["**/*.py"],
+      "allow": ["runtime/server.py"],
+      "thresholds": { "minTokens": 20, "minLines": 3 },
+      "disable": ["semantic"]
+    }
+  ]
+}

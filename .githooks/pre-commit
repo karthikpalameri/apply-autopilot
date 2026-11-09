@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit — real enforcement, not documentation.
+#
+# Versioned here (not .git/hooks/) so a fresh clone can install it with:
+#   scripts/check.sh --install
+#
+# Skip in a genuine emergency with:  git commit --no-verify
+# If you reach for --no-verify, fix the gate first instead; the one thing this
+# hook exists to stop is a green-looking commit that never ran the checks.
+set -uo pipefail
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+# Fast path: nothing staged that a gate inspects.
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+printf '▶ pre-commit: running scripts/check.sh\n'
+if ! out="$(scripts/check.sh 2>&1)"; then
+  echo "$out" | grep -E '^▶|❌|✅|ALL GATES|GATE FAILED' | sed 's/^/  /'
+  echo
+  echo "  COMMIT BLOCKED — see the findings above."
+  echo "  Fix the cause, or re-run 'scripts/check.sh' for the full output."
+  echo "  Do NOT add noqa/type:ignore to get past this."
+  exit 1
+fi
+echo "  ✅ all gates pass"
