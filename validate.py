@@ -22,7 +22,7 @@ RUNTIME_FILES = {
     "config/user.json", "config/profile.json", "config/profile.md",
     "config/progress.json", "config/applied_vs_not_applied.md",
     "config/product_companies_tracker.md", "config/mcp_session.json",
-    "config/resume.md5", "config/targets.json",
+    "config/resume.md5", "config/resume_facts.json", "config/targets.json",
 }
 
 
